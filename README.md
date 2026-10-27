@@ -14,7 +14,7 @@ An interactive tool for Computer Science and Data Science students: search a job
    - ⚠️ **The AI Trap** — how students shortcut the skill, plus warning signs
    - 🛡️ **The Independent Verification Challenge** — a timed, off-AI drill with pass criteria you check off to mark the skill verified
 
-Each roadmap page also ranks the skills the role's postings ask for, including ones not on the roadmap (other skills on the site, plus languages and tools like Java, Go, Kafka and Snowflake). Click any of them for real excerpts and a quick self-check.
+Each roadmap page also lists every skill the role's postings ask for, with the share of postings mentioning it, including ones not on the roadmap (other skills on the site, plus languages and tools like Java, Go, Kafka and Snowflake). Click any of them for real excerpts and a quick self-check.
 
 19 roles across data, software, web, mobile, infrastructure, security, QA, embedded and AI.
 

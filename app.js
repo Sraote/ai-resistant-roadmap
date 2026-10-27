@@ -494,45 +494,53 @@
     return parts.join(' · ');
   }
 
+  // Every skill (roadmap or not) that at least one of the role's postings mentions, most-mentioned first.
+  function demandRows(role, rd) {
+    const inMap = new Set(role.stages.flatMap((s) => s.skills));
+    return Object.entries(rd.skills).map(([id, v]) => ({ kind: 'skill', key: id, name: SKILLS[id].title, pct: v.pct, count: v.count, inMap: inMap.has(id) }))
+      .concat(Object.entries(rd.extras || {}).map(([name, v]) => ({ kind: 'extra', key: name, name, pct: v.pct, count: v.count, inMap: false })))
+      .filter((r) => r.count > 0)
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  }
+  // Two columns on desktop that read top-to-bottom, then left-to-right.
+  function demandList(rows, rd, asCounts) {
+    const max = Math.max(...rows.map((r) => r.count), 1);
+    return `<ol class="mt-6 md:columns-2 md:gap-x-10">
+      ${rows.map((r) => `
+        <li class="break-inside-avoid mb-2.5 grid grid-cols-[minmax(0,1fr)_4.5rem_3rem] sm:grid-cols-[minmax(0,13rem)_1fr_3.5rem] items-center gap-3 text-sm">
+          <button type="button" ${linkAttr(r)} class="text-left truncate hover:text-indigo-600 dark:hover:text-indigo-300 hover:underline underline-offset-2 ${r.inMap ? 'font-medium' : 'text-slate-500'}" title="${esc(r.name)}">${esc(r.name)}</button>
+          <span class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <span class="block h-full rounded-full ${r.inMap ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}" style="width:${Math.max(2, (r.count / max) * 100)}%"></span>
+          </span>
+          <span class="text-right tabular-nums text-slate-600 dark:text-slate-300">${asCounts ? `${r.count}/${rd.n}` : r.pct ? `${r.pct}%` : '&lt;1%'}</span>
+        </li>`).join('')}
+    </ol>`;
+  }
+  const demandLegend = `
+    <div class="flex items-center gap-4 text-xs text-slate-500">
+      <span class="flex items-center gap-1.5"><span class="w-3 h-2 rounded-sm bg-indigo-500"></span>On this roadmap</span>
+      <span class="flex items-center gap-1.5"><span class="w-3 h-2 rounded-sm bg-slate-300 dark:bg-slate-600"></span>Not on roadmap</span>
+    </div>`;
+
   // "What postings ask for": every tracked skill, roadmap or not, ranked by share of postings.
   function demandSection(role) {
     const rd = roleData(role.id);
     if (!rd) return JOB && JOB.roles && JOB.roles[role.id] ? smallSampleSection(role, null) : '';
     if (!enough(rd)) return smallSampleSection(role, rd);
-    const inMap = new Set(role.stages.flatMap((s) => s.skills));
-    const rows = Object.entries(rd.skills).map(([id, v]) => ({ kind: 'skill', key: id, name: SKILLS[id].title, pct: v.pct, count: v.count, inMap: inMap.has(id) }))
-      .concat(Object.entries(rd.extras).map(([name, v]) => ({ kind: 'extra', key: name, name, pct: v.pct, count: v.count, inMap: false })))
-      .filter((r) => r.count > 0)
-      .sort((a, b) => b.pct - a.pct || b.count - a.count)
-      .slice(0, 15);
-    const max = Math.max(...rows.map((r) => r.pct), 1);
-    // Column-major order on desktop so the list reads top-to-bottom, then left-to-right.
-    const ROWS = ['md:grid-rows-[repeat(1,auto)]', 'md:grid-rows-[repeat(2,auto)]', 'md:grid-rows-[repeat(3,auto)]', 'md:grid-rows-[repeat(4,auto)]',
-      'md:grid-rows-[repeat(5,auto)]', 'md:grid-rows-[repeat(6,auto)]', 'md:grid-rows-[repeat(7,auto)]', 'md:grid-rows-[repeat(8,auto)]'];
-    const rowCls = ROWS[Math.ceil(rows.length / 2) - 1] || ROWS[7];
+    const rows = demandRows(role, rd);
+    const onMap = rows.filter((r) => r.inMap).length;
     return `
       <section class="mt-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-8">
         <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
           <div>
             <h2 class="text-xl font-bold tracking-tight">What ${esc(role.title)} postings ask for</h2>
             <p class="mt-1 text-sm text-slate-500">${sampleNote(rd)}</p>
+            <p class="mt-1 text-sm text-slate-500">${plural(rows.length, 'skill')} mentioned · ${onMap} on this roadmap, ${rows.length - onMap} not</p>
           </div>
-          <div class="flex items-center gap-4 text-xs text-slate-500">
-            <span class="flex items-center gap-1.5"><span class="w-3 h-2 rounded-sm bg-indigo-500"></span>On this roadmap</span>
-            <span class="flex items-center gap-1.5"><span class="w-3 h-2 rounded-sm bg-slate-300 dark:bg-slate-600"></span>Not on roadmap</span>
-          </div>
+          ${demandLegend}
         </div>
         ${rd.n < 30 ? `<p class="mt-4 text-sm rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200 px-3 py-2">Small sample: only ${plural(rd.n, 'intern and junior posting')} this week, so treat these percentages as rough.</p>` : ''}
-        <ol class="mt-6 grid gap-x-10 gap-y-2.5 md:grid-cols-2 md:grid-flow-col ${rowCls}">
-          ${rows.map((r) => `
-            <li class="grid grid-cols-[minmax(0,10rem)_1fr_3rem] sm:grid-cols-[minmax(0,13rem)_1fr_3rem] items-center gap-3 text-sm">
-              <button type="button" ${linkAttr(r)} class="text-left truncate hover:text-indigo-600 dark:hover:text-indigo-300 hover:underline underline-offset-2 ${r.inMap ? 'font-medium' : 'text-slate-500'}">${esc(r.name)}</button>
-              <span class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                <span class="block h-full rounded-full ${r.inMap ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}" style="width:${(r.pct / max) * 100}%"></span>
-              </span>
-              <span class="text-right tabular-nums text-slate-600 dark:text-slate-300">${r.pct}%</span>
-            </li>`).join('')}
-        </ol>
+        ${demandList(rows, rd, false)}
         <p class="mt-5 text-xs text-slate-500">Share of postings that mention the skill or a close equivalent anywhere in the description. Click any skill for details. <a href="#/about" class="underline underline-offset-2 hover:text-indigo-600">Methodology</a></p>
       </section>`;
   }
@@ -556,6 +564,15 @@
             </a>
             <span class="shrink-0 text-xs px-2 py-0.5 rounded-full ${p.level === 'intern' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}">${p.level === 'intern' ? 'Internship' : 'Junior'}</span>
           </li>`).join('')}</ul>` : ''}
+        ${rd && demandRows(role, rd).length ? `
+          <div class="mt-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+            <div>
+              <h3 class="text-lg font-bold tracking-tight">What ${n === 1 ? 'this posting asks' : 'these postings ask'} for</h3>
+              <p class="mt-1 text-sm text-slate-500">Number of postings mentioning each skill, out of ${n}</p>
+            </div>
+            ${demandLegend}
+          </div>
+          ${demandList(demandRows(role, rd), rd, true)}` : ''}
       </section>`;
   }
 
