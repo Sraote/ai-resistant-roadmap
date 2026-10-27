@@ -51,6 +51,10 @@
   const skillStat = (rid, sid) => { const r = roleData(rid); return r ? r.skills[sid] : null; };
   const fmtDate = (d) => new Date(d + 'T00:00:00Z').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   const nCompanies = () => (JOB ? JOB.boards.length : 0);
+  const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : (many || one + 's')}`;
+  // Percentages are only shown when a role has enough postings to make them meaningful.
+  const MIN_SAMPLE = (JOB && JOB.minSample) || 10;
+  const enough = (rd) => !!rd && rd.n >= MIN_SAMPLE;
 
   // ---------- theme ----------
   document.getElementById('themeToggle').addEventListener('click', () => {
@@ -155,7 +159,7 @@
       active = -1;
       list.innerHTML = results.map((r, i) => {
         const rd = roleData(r.role.id);
-        const sub = [r.text !== r.role.title ? `Matches “${esc(r.text)}”` : '', rd ? `${rd.n.toLocaleString()} intern &amp; junior postings` : ''].filter(Boolean).join(' · ');
+        const sub = [r.text !== r.role.title ? `Matches “${esc(r.text)}”` : '', rd ? plural(rd.n, 'intern &amp; junior posting') : ''].filter(Boolean).join(' · ');
         return `<li role="option" id="${list.id}-${i}" data-i="${i}" aria-selected="false"
             class="cursor-pointer px-4 py-2.5 flex items-center justify-between gap-3 text-left aria-selected:bg-indigo-50 dark:aria-selected:bg-indigo-500/15 hover:bg-slate-50 dark:hover:bg-slate-800/70">
             <span class="min-w-0"><span class="block truncate text-slate-900 dark:text-slate-100">${markPrefix(r.role.title, q.trim())}</span>
@@ -323,7 +327,7 @@
           ${best ? '<span class="text-[11px] font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Best match</span>' : ''}
         </div>
         <div class="mt-2 text-lg font-semibold leading-snug">${esc(r.title)}</div>
-        <div class="text-xs text-slate-500 mt-0.5">${esc(r.level)}${rd ? ` · ${rd.n.toLocaleString()} intern &amp; junior postings` : ''}</div>
+        <div class="text-xs text-slate-500 mt-0.5">${esc(r.level)}${rd ? ` · ${plural(rd.n, 'intern &amp; junior posting')}` : ''}</div>
         <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">${esc(r.summary)}</p>
         <div class="mt-4 flex flex-wrap gap-1.5">
           ${ids.slice(0, 3).map((id) => `<span class="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${esc(SKILLS[id].title)}</span>`).join('')}
@@ -480,15 +484,16 @@
 
   function sampleNote(rd) {
     if (!rd) return '';
-    const parts = [`${rd.n.toLocaleString()} intern &amp; junior postings from ${rd.companies} companies`, `collected ${fmtDate(JOB.collectedAt)}`];
-    if (rd.nInterns != null) parts.splice(1, 0, `${rd.nInterns} internships, ${rd.nJunior} junior roles`);
+    const parts = [`${plural(rd.n, 'intern &amp; junior posting')} from ${plural(rd.companies, 'company', 'companies')}`, `collected ${fmtDate(JOB.collectedAt)}`];
+    if (rd.nInterns != null) parts.splice(1, 0, `${plural(rd.nInterns, 'internship')}, ${plural(rd.nJunior, 'junior role')}`);
     return parts.join(' · ');
   }
 
   // "What postings ask for": every tracked skill, roadmap or not, ranked by share of postings.
   function demandSection(role) {
     const rd = roleData(role.id);
-    if (!rd) return '';
+    if (!rd) return JOB && JOB.roles && JOB.roles[role.id] ? smallSampleSection(role, null) : '';
+    if (!enough(rd)) return smallSampleSection(role, rd);
     const inMap = new Set(role.stages.flatMap((s) => s.skills));
     const rows = Object.entries(rd.skills).map(([id, v]) => ({ name: SKILLS[id].title, pct: v.pct, count: v.count, id, inMap: inMap.has(id) }))
       .concat(Object.entries(rd.extras).map(([name, v]) => ({ name, pct: v.pct, count: v.count, inMap: false })))
@@ -512,7 +517,7 @@
             <span class="flex items-center gap-1.5"><span class="w-3 h-2 rounded-sm bg-slate-300 dark:bg-slate-600"></span>Not on roadmap</span>
           </div>
         </div>
-        ${rd.n < 30 ? `<p class="mt-4 text-sm rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200 px-3 py-2">Small sample: only ${rd.n} intern and junior postings this week, so treat these percentages as rough.</p>` : ''}
+        ${rd.n < 30 ? `<p class="mt-4 text-sm rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200 px-3 py-2">Small sample: only ${plural(rd.n, 'intern and junior posting')} this week, so treat these percentages as rough.</p>` : ''}
         <ol class="mt-6 grid gap-x-10 gap-y-2.5 md:grid-cols-2 md:grid-flow-col ${rowCls}">
           ${rows.map((r) => `
             <li class="grid grid-cols-[minmax(0,10rem)_1fr_3rem] sm:grid-cols-[minmax(0,13rem)_1fr_3rem] items-center gap-3 text-sm">
@@ -526,6 +531,28 @@
             </li>`).join('')}
         </ol>
         <p class="mt-5 text-xs text-slate-500">Share of postings that mention the skill or a close equivalent anywhere in the description. <a href="#/about" class="underline underline-offset-2 hover:text-indigo-600">Methodology</a></p>
+      </section>`;
+  }
+
+  // Too few postings for percentages: list the postings themselves instead.
+  function smallSampleSection(role, rd) {
+    const n = rd ? rd.n : 0;
+    const list = (rd && rd.postings) || [];
+    return `
+      <section class="mt-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-8">
+        <h2 class="text-xl font-bold tracking-tight">Open intern &amp; junior ${esc(role.title)} postings</h2>
+        <p class="mt-1 text-sm text-slate-500">${rd ? sampleNote(rd) : 'No posting data yet.'}</p>
+        <p class="mt-4 text-sm rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200 px-3 py-2">
+          ${n ? `Only ${plural(n, 'intern or junior posting')} this week, which is too few for meaningful percentages, so here ${n === 1 ? 'it is' : 'they are'} directly.` : 'No intern or junior postings for this role this week.'}
+          Junior hiring is seasonal, so check back after the next weekly refresh.</p>
+        ${list.length ? `<ul class="mt-5 divide-y divide-slate-100 dark:divide-slate-800">
+          ${list.map((p) => `<li class="py-3 flex items-center justify-between gap-4">
+            <a href="${esc(safeUrl(p.url))}" target="_blank" rel="noopener noreferrer" class="min-w-0 group">
+              <span class="block font-medium truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-300">${esc(p.title)} ↗</span>
+              <span class="block text-sm text-slate-500 truncate">${esc(p.company)}</span>
+            </a>
+            <span class="shrink-0 text-xs px-2 py-0.5 rounded-full ${p.level === 'intern' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}">${p.level === 'intern' ? 'Internship' : 'Junior'}</span>
+          </li>`).join('')}</ul>` : ''}
       </section>`;
   }
 
@@ -565,7 +592,7 @@
         </div>
         <div class="mt-1.5 flex items-center gap-2 text-[11px] text-slate-500">
           <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full ${r.dot}"></span>${r.short} risk</span>
-          ${stat ? `<span>·</span><span>in ${stat.pct}% of postings</span>` : ''}
+          ${stat && enough(roleData(current.role.id)) ? `<span>·</span><span>in ${stat.pct}% of postings</span>` : ''}
         </div>
       </button>`;
   }
@@ -685,7 +712,7 @@
           <h2 id="panelTitle" class="mt-0.5 text-xl font-bold tracking-tight">${esc(s.title)}</h2>
           <div class="mt-2 flex flex-wrap gap-2">
             <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ring-1 ${r.chip}"><span class="w-1.5 h-1.5 rounded-full ${r.dot}"></span>${r.label}</span>
-            ${stat ? `<span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">In ${stat.pct}% of ${rd.n.toLocaleString()} postings</span>` : ''}
+            ${stat ? `<span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${enough(rd) ? `In ${stat.pct}% of ${rd.n.toLocaleString()} postings` : `In ${stat.count} of ${plural(rd.n, 'posting')}`}</span>` : ''}
           </div>
         </div>
         <button data-close class="shrink-0 w-9 h-9 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close panel">
@@ -699,7 +726,7 @@
           ${stat ? `
             <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
               Mentioned in <span class="font-semibold text-slate-900 dark:text-white">${stat.count.toLocaleString()} of ${rd.n.toLocaleString()}</span>
-              intern and junior ${esc(current.role.title)} postings (${stat.pct}%).
+              intern and junior ${esc(current.role.title)} postings${enough(rd) ? ` (${stat.pct}%)` : ' (too few this week for a reliable percentage)'}.
             </p>
             ${stat.excerpts.length ? `
               <div class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">From real postings</div>

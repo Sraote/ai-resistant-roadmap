@@ -78,6 +78,7 @@ YEARS = re.compile(r"(\d{1,2})\s*(?:\+|plus)?\s*(?:(?:-|–|—|to)\s*\d{1,2}\s*
 ENTRY_PHRASES = re.compile(r"new grad|recent(ly)? graduat|entry[- ]level|early[- ]career|no (prior |previous )?experience (is )?required|"
                            r"0\s*(?:-|–|to)\s*[12]\s*years", re.I)
 JUNIOR_MAX_YEARS = 2
+MIN_SAMPLE = 10  # below this, percentages aren't meaningful
 
 def level_of(job):
     """Return 'intern', 'junior' or None (mid/senior/unknown)."""
@@ -439,6 +440,10 @@ def main(out_path):
             "n": n, "nInterns": sum(j["level"] == "intern" for j in sample),
             "nJunior": sum(j["level"] == "junior" for j in sample), "nAllLevels": len(matched),
             "companies": len({j["company"] for j in sample}),
+            # Small samples: list the postings themselves (the site hides percentages below MIN_SAMPLE).
+            "postings": [{"title": j["title"], "company": j["company"], "url": j["url"], "level": j["level"]}
+                         for j in sorted(sample, key=lambda j: (j["level"] != "intern", j["company"], j["title"]))][:MIN_SAMPLE]
+                        if n < MIN_SAMPLE else [],
             "skills": skills, "extras": extras,
         }
         print(f"  {rid:26s} n={n:4d} (interns {roles_out[rid]['nInterns']}, junior {roles_out[rid]['nJunior']}, all levels {len(matched)})")
@@ -448,6 +453,7 @@ def main(out_path):
         "totalPostings": len(uniq),
         "entryPostings": len(matched_any),
         "juniorMaxYears": JUNIOR_MAX_YEARS,
+        "minSample": MIN_SAMPLE,
         "boards": sorted(ok_sources, key=lambda s: -s["jobs"]),
         "roles": roles_out,
     }
