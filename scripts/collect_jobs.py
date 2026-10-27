@@ -86,7 +86,7 @@ ROLES = {
                             r"\bdashboard", re.I),
     },
     "ml-engineer": {
-        "title": re.compile(r"machine learning engineer|\bml engineer|\bmle\b|\bai engineer|\bai/ml engineer|"
+        "title": re.compile(r"machine learning engineer|\bml engineer|\bmle\b|\bai/ml engineer|"
                             r"\bml/ai engineer|\bmlops|machine learning (platform|infrastructure)", re.I),
     },
     "data-scientist": {
@@ -99,6 +99,50 @@ ROLES = {
     },
     "analytics-engineer": {
         "title": re.compile(r"\banalytics engineer", re.I),
+    },
+    "software-engineer": {
+        "title": re.compile(r"\bsoftware (engineer|developer|development engineer)\b|\bSWE\b|\bnew grad", re.I),
+        "exclude": re.compile(r"\bin test\b|\bqa\b|\bsales\b|\bsolutions\b|\bsupport\b|\bmanager", re.I),
+    },
+    "frontend-developer": {
+        "title": re.compile(r"front[- ]?end|\bUI (engineer|developer)\b|\bweb (developer|engineer)\b|\breact (developer|engineer)", re.I),
+    },
+    "fullstack-developer": {
+        "title": re.compile(r"full[- ]?stack", re.I),
+    },
+    "mobile-developer": {
+        "title": re.compile(r"(?=.*\b(ios|android|mobile|swift|kotlin|react native|flutter)\b)(?=.*\b(engineer|developer)\b)", re.I),
+        "exclude": re.compile(r"\bqa\b|\btest\b|\bsales\b|\bsupport\b", re.I),
+    },
+    "devops-engineer": {
+        "title": re.compile(r"dev ?(sec)?ops|\bplatform engineer|\binfrastructure engineer|build (and|&) release|release engineer", re.I),
+        "exclude": re.compile(r"\bdata\b|machine learning|\bml\b", re.I),
+    },
+    "sre": {
+        "title": re.compile(r"site reliability|\bSRE\b|reliability engineer|production engineer", re.I),
+    },
+    "cloud-engineer": {
+        "title": re.compile(r"\bcloud (engineer|developer|infrastructure|platform|operations|security engineer|systems)", re.I),
+        "exclude": re.compile(r"\bsales\b|account", re.I),
+    },
+    "security-engineer": {
+        "title": re.compile(r"\bsecurity (engineer|analyst|developer|researcher|operations)|\bappsec\b|application security|"
+                            r"product security|detection (and response )?engineer|\bcyber|\bSOC analyst|infosec|offensive security|"
+                            r"penetration tester|threat (intelligence|detection)", re.I),
+        "exclude": re.compile(r"\bsales\b|account|\bgrc\b|compliance|physical", re.I),
+    },
+    "qa-engineer": {
+        "title": re.compile(r"\bQA\b|quality assurance|quality engineer|test (automation|engineer)|\bSDET\b|engineer in test|"
+                            r"automation (test|qa|engineer)", re.I),
+        "exclude": re.compile(r"marketing automation|sales|\bhardware\b", re.I),
+    },
+    "embedded-engineer": {
+        "title": re.compile(r"\bembedded\b|\bfirmware\b", re.I),
+    },
+    "ai-engineer": {
+        "title": re.compile(r"\bai engineer|\bLLM\b|generative ai|\bgenai\b|applied ai|\bai (application|product|software|platform) engineer|"
+                            r"prompt engineer|\bai developer|\bagents? engineer", re.I),
+        "exclude": re.compile(r"\bsales\b|\bresearch scientist\b|solutions|account", re.I),
     },
 }
 
@@ -133,7 +177,7 @@ SKILLS = {
     "airflow":        (r"Airflow|Dagster|Prefect|Luigi|orchestration", I),
     "spark":          (r"\bSpark\b|PySpark|Databricks|Hadoop|\bFlink\b|distributed (data )?processing", I),
     "cloud":          (r"\bAWS\b|Azure|\bGCP\b|Google Cloud|\bcloud\b", I),
-    "docker":         (r"Docker|Kubernetes|\bk8s\b|containeri[sz]|\bcontainers?\b", I),
+    "docker":         (r"Docker|containeri[sz]|\bcontainers?\b|Podman", I),
     "async":          (r"asyncio|\basync\b|asynchronous|concurren|multi-?thread|parallel processing", I),
     "db-design":      (r"PostgreSQL|Postgres\b|MySQL|relational databases?|database design|schema design|SQL Server", I),
     "linear-algebra": (r"linear algebra|calculus|probability|mathematic|\bmath\b", I),
@@ -146,21 +190,62 @@ SKILLS = {
                        r"SageMaker|Vertex AI|model serving|ML infrastructure|models? (in|into|to) production", I),
     "storytelling":   (r"communicat|present(ing|ations?)\b|storytelling|non-technical (audiences?|stakeholders)|"
                        r"stakeholders", I),
+    "html-css":       (r"\bHTML5?\b|\bCSS3?\b|Tailwind|\bSass\b|\bSCSS\b|responsive design", I),
+    "javascript":     (r"JavaScript|TypeScript|\bES6\b|Node\.?js", I),
+    "react":          (r"\bReact\b|Next\.js|\bVue(\.js)?\b|\bAngular\b|\bSvelte\b", 0),
+    "accessibility":  (r"accessibility|\bWCAG\b|\ba11y\b|screen readers?|\bARIA\b", I),
+    "web-perf":       (r"(web|front[- ]?end|page|app|application|mobile|rendering) performance|Core Web Vitals|Lighthouse|"
+                       r"bundle size|performance optimi[sz]ation", I),
+    "system-design":  (r"system design|distributed systems|scalable (systems|services|architecture|software)|"
+                       r"high[- ]availability|fault[- ]toleran", I),
+    "networking":     (r"networking|TCP/IP|\bTCP\b|\bDNS\b|\bHTTPS?\b|load balanc|firewalls?|\bVPC\b|subnet|\bBGP\b", I),
+    "ci-cd":          (r"CI/CD|continuous (integration|delivery|deployment)|GitHub Actions|Jenkins|CircleCI|GitLab CI|"
+                       r"Buildkite|Argo ?CD|(build|deployment|release) pipelines?", I),
+    "iac":            (r"Terraform|Pulumi|CloudFormation|infrastructure[- ]as[- ]code|\bIaC\b|Ansible|\bCDK\b", I),
+    "kubernetes":     (r"Kubernetes|\bk8s\b|\bEKS\b|\bGKE\b|\bAKS\b|\bHelm\b|OpenShift", I),
+    "observability":  (r"observability|monitoring|Prometheus|Grafana|OpenTelemetry|\btracing\b|alerting|\bSLOs?\b|\bSLIs?\b|"
+                       r"Datadog|New Relic|Splunk", I),
+    "incident-response": (r"incident (response|management)|on[- ]call|post[- ]?mortems?|pager ?duty", I),
+    "appsec":         (r"OWASP|application security|secure (coding|code|software|development)|vulnerabilit|"
+                       r"authentication|authori[sz]ation|OAuth|penetration test|pentest|\bXSS\b|SQL injection", I),
+    "threat-modeling": (r"threat model|risk assessments?|attack surface|security architecture|security (design )?reviews?", I),
+    "detection":      (r"\bSIEM\b|detection (engineering|rules|and response)|threat (detection|hunting|intelligence)|Splunk|"
+                       r"\bEDR\b|\bSOC\b(?!\s?[12])|log analysis|intrusion detection|\bIDS\b", I),
+    "test-automation": (r"Selenium|Playwright|Cypress|Appium|end[- ]to[- ]end tests?|\bE2E\b|test automation|"
+                       r"automated testing|WebDriver|XCUITest|Espresso", I),
+    "c-cpp":          (r"C\+\+|\bC/C\+\+|(?<![\w#+])(?<!Series )(?<!series )(?<!Round )C(?= programming| language|, | or | and |/)|\bANSI C\b|\bembedded C\b|"
+                       r"memory management", 0),
+    "embedded-hw":    (r"[Mm]icrocontrollers?|\bMCUs?\b|\bARM\b|Cortex-M|\bI2C\b|\bSPI\b|\bUART\b|CAN bus|CAN-FD|"
+                       r"[Oo]scilloscopes?|[Ll]ogic analy[sz]ers?|[Ss]chematics|\bGPIO\b|[Bb]are[- ]metal|JTAG|\bFPGA\b", 0),
+    "rtos":           (r"\bRTOS\b|real[- ]time (operating systems?|systems|constraints|embedded)|FreeRTOS|Zephyr|ThreadX|"
+                       r"\binterrupts?\b|\bISRs?\b", I),
+    "os-concepts":    (r"operating systems?|kernel|memory management|multi-?threading|concurrency|virtual memory|"
+                       r"systems programming|\bsyscalls?\b|low[- ]level", I),
+    "mobile-native":  (r"\bSwift\b|SwiftUI|UIKit|\bKotlin\b|Jetpack Compose|Objective-C|React Native|\bFlutter\b|"
+                       r"Android SDK|iOS SDK", 0),
+    "mobile-arch":    (r"\bMVVM\b|\bMVC\b|\bMVI\b|app lifecycle|Core Data|offline[- ]first|coroutines|dependency injection|"
+                       r"App Store|Google Play|mobile (app )?architecture", I),
+    "llm-apps":       (r"\bLLMs?\b|large language models?|generative AI|\bGenAI\b|prompt engineering|prompting|"
+                       r"function calling|tool use|AI agents?|agentic", I),
+    "rag":            (r"\bRAG\b|retrieval[- ]augmented|vector (databases?|search|stores?|DBs?)|embeddings|semantic search|"
+                       r"pgvector|Weaviate|FAISS|Pinecone", I),
+    "llm-evals":      (r"\bevals?\b|evaluation (frameworks?|pipelines?|harness)|LLM evaluation|hallucinations?|guardrails|"
+                       r"red[- ]teaming", I),
 }
 EXTRAS = {
+    "Java":           (r"\bJava\b(?!Script)", 0),
+    "Go":             (r"\bGolang\b|\bGo\b(?=\s*(,|/|\)|or\b|and\b))", 0),
+    "Rust":           (r"\bRust\b", 0),
+    "C# / .NET":      (r"C#|\.NET\b", 0),
+    "Ruby / Rails":   (r"\bRuby\b|\bRails\b", 0),
+    "Scala":          (r"\bScala\b", 0),
+    "GraphQL":        (r"GraphQL", 0),
+    "Kafka":          (r"Kafka", I),
     "Snowflake":      (r"Snowflake", 0),
     "BigQuery":       (r"BigQuery", I),
     "Redshift":       (r"Redshift", I),
     "dbt":            (r"\bdbt\b", I),
-    "Kafka":          (r"Kafka", I),
-    "Java":           (r"\bJava\b(?!Script)", 0),
-    "Scala":          (r"\bScala\b", 0),
-    "JavaScript / TypeScript": (r"JavaScript|TypeScript|Node\.js", I),
-    "React":          (r"\bReact\b", 0),
-    "Terraform":      (r"Terraform|infrastructure as code", I),
-    "CI/CD":          (r"CI/CD|continuous (integration|delivery|deployment)", I),
     "NoSQL":          (r"NoSQL|MongoDB|Cassandra|DynamoDB|Redis", I),
-    "LLMs / GenAI":   (r"\bLLMs?\b|large language models?|generative AI|\bGenAI\b|\bRAG\b", I),
 }
 SKILL_RX = {k: re.compile(p, f) for k, (p, f) in SKILLS.items()}
 EXTRA_RX = {k: re.compile(p, f) for k, (p, f) in EXTRAS.items()}

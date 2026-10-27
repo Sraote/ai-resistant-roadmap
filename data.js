@@ -789,12 +789,588 @@ window.SKILLS = {
         "You answered all 3 questions without saying 'I'd have to check'"
       ]
     }
+  },
+  "html-css": {
+    title: "HTML & CSS Layout", category: "Web", rubric: [3, 2, 1],
+    reqs: [
+      "Write semantic HTML (landmarks, headings, forms, buttons vs. links)",
+      "Build responsive layouts with Flexbox and Grid without a framework",
+      "Debug specificity, the box model and stacking context in DevTools"
+    ],
+    trap: "AI hands you a page that looks right at one screen size. Students paste it in, stack utility classes until it 'works', and never learn why an element overflows on mobile or why `z-index: 9999` doesn't fix it.",
+    flags: [
+      "You fix layout bugs by adding more wrappers or `!important`",
+      "You can't explain when to use Grid instead of Flexbox"
+    ],
+    challenge: {
+      title: "Rebuild a Layout Blind",
+      time: 40,
+      prompt: "Pick a real page you like (a news site or a product page). Screenshot it at desktop and phone width. With only MDN open, rebuild its main layout in plain HTML and CSS: no frameworks, no AI, no copying its source. It must reflow correctly at 375px, 768px and 1280px.",
+      criteria: [
+        "Matches both screenshots within reason at all three widths",
+        "Uses semantic elements (header, nav, main, article) rather than div soup",
+        "No `!important` and no fixed pixel widths on containers"
+      ]
+    }
+  },
+  "javascript": {
+    title: "JavaScript & TypeScript", category: "Web", rubric: [3, 3, 2],
+    reqs: [
+      "Understand closures, `this`, the event loop, promises and async/await",
+      "Manipulate the DOM and handle events without a framework",
+      "Use TypeScript types, generics and narrowing to catch bugs early"
+    ],
+    trap: "Copilot is fluent in JavaScript, so students ship code full of race conditions, unhandled promise rejections and `any` types without noticing. Interviewers love asking what the event loop does with a `setTimeout(0)`, and prompting doesn't build that model.",
+    flags: [
+      "You can't predict the output order of a mix of promises and timeouts",
+      "Your TypeScript is mostly `any` and `as` casts"
+    ],
+    challenge: {
+      title: "Event Loop on Paper",
+      time: 25,
+      prompt: "Write down, on paper, the exact console output order of a snippet that mixes `console.log`, `setTimeout(…, 0)`, `Promise.resolve().then(…)`, an `async` function with `await`, and `queueMicrotask`. Then, in an editor with completion off, implement a `debounce(fn, ms)` and a typed `retry<T>(fn: () => Promise<T>, attempts: number)`.",
+      criteria: [
+        "Predicted output order is exactly right, and you can explain microtasks vs. tasks",
+        "`debounce` preserves `this` and arguments",
+        "`retry` is fully typed with no `any`, and rethrows after the final attempt"
+      ]
+    }
+  },
+  "react": {
+    title: "React & Component Frameworks", category: "Web", rubric: [3, 3, 2],
+    reqs: [
+      "Build components with props, state, effects and controlled forms",
+      "Know when components re-render and how to avoid stale closures",
+      "Structure state: lift it, colocate it, or move it to context or a store"
+    ],
+    trap: "AI writes React that renders, but with `useEffect` used for everything, missing dependency arrays and state duplicated in three places. Students can't explain why a component re-renders forever or shows stale data, because they never reasoned about the render cycle.",
+    flags: [
+      "You add `// eslint-disable-next-line` to silence dependency warnings",
+      "You can't say what triggers a re-render"
+    ],
+    challenge: {
+      title: "Debug the Render Loop",
+      time: 30,
+      prompt: "Build, from an empty component and the React docs only, a searchable list that fetches results as you type (debounced), shows loading and error states, and cancels stale requests. Then add a `console.log` in render and explain every render you see while typing 'react'.",
+      criteria: [
+        "No stale results appear when typing fast (requests are cancelled or ignored)",
+        "Effect dependency arrays are complete with no lint suppressions",
+        "You account for every logged render out loud"
+      ]
+    }
+  },
+  "accessibility": {
+    title: "Web Accessibility (a11y)", category: "Web", rubric: [2, 3, 1],
+    reqs: [
+      "Meet WCAG basics: contrast, focus order, labels, alt text",
+      "Make custom widgets keyboard- and screen-reader-operable with correct ARIA",
+      "Test with a keyboard, a screen reader and automated audits"
+    ],
+    trap: "AI-generated UIs look polished but often use clickable `div`s, missing labels and ARIA attributes sprinkled on incorrectly. Nothing errors and the page looks fine, so students never find out it's unusable without a mouse.",
+    flags: [
+      "You've never navigated your own app using only the keyboard",
+      "You add `role` or `aria-*` attributes without checking what they do"
+    ],
+    challenge: {
+      title: "Unplug the Mouse",
+      time: 30,
+      prompt: "Take a project you built. Unplug your mouse (or trackpad) and complete its main task with the keyboard only. Then turn on VoiceOver or NVDA and do it again with your eyes closed. Log every barrier, fix them, and rerun both tests.",
+      criteria: [
+        "Main task completable by keyboard alone, with a visible focus indicator throughout",
+        "Every control is announced with a sensible name and role",
+        "Lighthouse accessibility score of 95+ after fixes"
+      ]
+    }
+  },
+  "web-perf": {
+    title: "Web Performance", category: "Web", rubric: [2, 3, 2],
+    reqs: [
+      "Measure Core Web Vitals (LCP, INP, CLS) and read a performance trace",
+      "Reduce bundle size with code splitting and lazy loading",
+      "Fix layout shifts, slow images and render-blocking resources"
+    ],
+    trap: "Ask an AI to 'make this faster' and you get generic advice: memoize everything, add lazy loading everywhere. Students apply it without measuring, sometimes making things slower, and can't read a flame chart to find the real bottleneck.",
+    flags: [
+      "You've optimized something without measuring before and after",
+      "You've never opened the Performance tab in DevTools"
+    ],
+    challenge: {
+      title: "Measure, Then Fix",
+      time: 40,
+      prompt: "Run Lighthouse and a DevTools performance recording on one of your sites using a throttled mobile profile. Write down the top 3 bottlenecks with evidence from the trace before changing anything. Fix them and record the before and after numbers.",
+      criteria: [
+        "Each bottleneck is backed by a specific trace or audit finding",
+        "LCP or INP improved measurably, with numbers recorded",
+        "At least one 'obvious' optimization you tried turned out not to matter, and you can say why"
+      ]
+    }
+  },
+  "system-design": {
+    title: "System Design Basics", category: "Architecture", rubric: [2, 2, 3],
+    reqs: [
+      "Design a service with APIs, a data model, caching and queues",
+      "Reason about trade-offs: consistency vs. availability, latency vs. cost",
+      "Estimate load (requests per second, storage) and find bottlenecks"
+    ],
+    trap: "AI produces textbook diagrams (load balancer, cache, queue, shards) for any prompt. Students memorize the boxes, but interviews probe the why: why that cache, what happens when it's stale, what breaks at 10x traffic. A generated diagram can't answer follow-ups.",
+    flags: [
+      "Your designs always include the same boxes regardless of requirements",
+      "You can't estimate requests per second or storage on the back of an envelope"
+    ],
+    challenge: {
+      title: "45-Minute Whiteboard Round",
+      time: 45,
+      prompt: "Have a peer play interviewer and give you 'Design a URL shortener' or 'Design a rate limiter'. On a whiteboard: clarify requirements, estimate scale, design the API and data model, then draw the architecture. Your peer then asks 3 'what if' questions (a node dies, traffic grows 10x, a hot key).",
+      criteria: [
+        "Requirements and scale estimates were stated before drawing boxes",
+        "Every component on the board has a stated reason to exist",
+        "You answered all 3 'what if' questions with a concrete change to the design"
+      ]
+    }
+  },
+  "networking": {
+    title: "Networking Fundamentals", category: "Infrastructure", rubric: [2, 2, 3],
+    reqs: [
+      "Explain what happens from typing a URL to the page loading (DNS, TCP, TLS, HTTP)",
+      "Understand IP addressing, subnets, ports, NAT and firewalls",
+      "Debug connectivity with curl, dig, traceroute and tcpdump"
+    ],
+    trap: "Networking problems are where AI-assisted students get stuck fastest. AI can suggest commands, but if you don't understand which layer is failing, you'll cycle through random fixes while the real issue is DNS or a security group.",
+    flags: [
+      "You can't explain the difference between TCP and UDP with an example",
+      "'Connection refused' and 'connection timed out' mean the same thing to you"
+    ],
+    challenge: {
+      title: "Trace a Request",
+      time: 30,
+      prompt: "Without notes, draw every step from typing `https://example.com` to the first byte of HTML arriving: DNS resolution, TCP handshake, TLS, HTTP. Then use `dig`, `curl -v` and `traceroute` to observe each step for a real site, and annotate your drawing with what you saw.",
+      criteria: [
+        "Drawing includes DNS, the TCP handshake, TLS and the HTTP request/response in order",
+        "Your annotations match real tool output",
+        "You can explain what would change if DNS failed vs. the port were firewalled"
+      ]
+    }
+  },
+  "ci-cd": {
+    title: "CI/CD Pipelines", category: "Tools", rubric: [3, 2, 1],
+    reqs: [
+      "Build pipelines that lint, test, build and deploy on every change",
+      "Manage secrets, caching, environments and approvals",
+      "Diagnose failing pipelines from their logs"
+    ],
+    trap: "Pipeline YAML is boilerplate AI writes easily, so students copy configs they can't read. When the pipeline breaks (cache misses, wrong secrets, flaky steps) they don't know where to look, or they leak a secret into logs.",
+    flags: [
+      "You've committed a secret or token while 'getting CI working'",
+      "You can't say which step runs on pull requests vs. merges to main"
+    ],
+    challenge: {
+      title: "Pipeline From Docs",
+      time: 40,
+      prompt: "Using only the official GitHub Actions (or GitLab CI) docs, write a pipeline for a small project: lint and test on pull requests, build and deploy only on main, cache dependencies, and read one secret safely. Then deliberately break it three ways and fix each from the logs alone.",
+      criteria: [
+        "Pull requests run checks only; deploys happen only from main",
+        "Dependency cache hits on the second run (visible in logs)",
+        "All three breakages diagnosed from logs, with no secret ever printed"
+      ]
+    }
+  },
+  "iac": {
+    title: "Infrastructure as Code (Terraform)", category: "Infrastructure", rubric: [3, 3, 1],
+    reqs: [
+      "Define cloud resources declaratively with Terraform or similar",
+      "Understand state, plans, modules and drift",
+      "Review a plan and spot destructive or risky changes"
+    ],
+    trap: "AI writes Terraform that applies cleanly. Students don't read the plan, so they miss that a rename will destroy and recreate a database, or that a security group is open to `0.0.0.0/0`. The code works, and that's the problem.",
+    flags: [
+      "You run `terraform apply` without reading the plan",
+      "You don't know where your state file lives or what's in it"
+    ],
+    challenge: {
+      title: "Read the Plan",
+      time: 35,
+      prompt: "Write Terraform from the provider docs for a storage bucket, an IAM role and a small VM. Apply it. Then rename a resource, change an instance type and tighten a firewall rule. Before applying, predict on paper which resources will be updated in place, replaced or destroyed, and compare your prediction with `terraform plan`.",
+      criteria: [
+        "Predictions match the plan for every resource",
+        "You used a `moved` block or state command to rename without destroying",
+        "No security rule is open to `0.0.0.0/0` unless justified in writing"
+      ]
+    }
+  },
+  "kubernetes": {
+    title: "Kubernetes", category: "Infrastructure", rubric: [3, 3, 1],
+    reqs: [
+      "Deploy apps with Deployments, Services, ConfigMaps and Secrets",
+      "Understand pods, scheduling, probes, resource limits and rollouts",
+      "Debug CrashLoopBackOff, pending pods and failing probes"
+    ],
+    trap: "Kubernetes manifests are long and repetitive, which makes them ideal for AI. Students apply generated YAML with no resource limits and copy-pasted probes, then stare at `CrashLoopBackOff` with no idea how to read events or logs.",
+    flags: [
+      "You can't explain the difference between a Deployment, a ReplicaSet and a Pod",
+      "Your first debugging step is deleting the pod"
+    ],
+    challenge: {
+      title: "Break-Fix Lab",
+      time: 40,
+      prompt: "On a local cluster (kind or minikube), deploy an app from manifests you write with only the Kubernetes docs. Have a peer introduce three faults: a bad image tag, a failing readiness probe and a missing ConfigMap key. Find and fix each using only `kubectl describe`, `logs` and `get events`.",
+      criteria: [
+        "All three faults diagnosed with the specific command that revealed them",
+        "Manifests include resource requests and limits",
+        "A rolling update completes with zero downtime"
+      ]
+    }
+  },
+  "observability": {
+    title: "Monitoring & Observability", category: "Infrastructure", rubric: [2, 2, 1],
+    reqs: [
+      "Instrument services with metrics, structured logs and traces",
+      "Define SLIs and SLOs and alert on symptoms, not causes",
+      "Build dashboards that answer 'is it broken and where?'"
+    ],
+    trap: "AI can scaffold dashboards and alerts, but students end up alerting on CPU at 80% and graphing everything. Without understanding what users actually experience, they build noisy alerts that get ignored.",
+    flags: [
+      "Your alerts fire on resource usage rather than user-facing symptoms",
+      "You can't state an SLO for any service you've built"
+    ],
+    challenge: {
+      title: "Define the SLO",
+      time: 35,
+      prompt: "For a small web service you run, write down by hand two SLIs and an SLO for each (for example, 99% of requests under 300ms). Instrument the service with Prometheus metrics or OpenTelemetry, build one dashboard, and create one alert based on error-budget burn. Then inject latency and confirm the alert fires.",
+      criteria: [
+        "SLIs measure user experience (latency, errors), not CPU",
+        "The alert fires on injected latency and stays quiet otherwise",
+        "Dashboard answers 'is it broken, and where?' in under 10 seconds"
+      ]
+    }
+  },
+  "incident-response": {
+    title: "Incident Response & On-Call", category: "Operations", rubric: [1, 2, 2],
+    reqs: [
+      "Triage, mitigate and communicate during an outage",
+      "Use runbooks and roll back safely under pressure",
+      "Write blameless postmortems with real action items"
+    ],
+    trap: "AI is a poor co-pilot at 3am. It doesn't know your system, and its confident guesses waste minutes. Students who've only practiced with AI have never built the habit of mitigating first and investigating later.",
+    flags: [
+      "Your instinct during an outage is to find the root cause before mitigating",
+      "You've never written a postmortem"
+    ],
+    challenge: {
+      title: "Game Day",
+      time: 45,
+      prompt: "With a peer as incident commander, run a game day on a service you deployed: they secretly break something (fill the disk, kill a dependency, push a bad config). You get paged and must mitigate, communicate status updates every 10 minutes, then write a one-page blameless postmortem.",
+      criteria: [
+        "Impact mitigated before the root cause was fully understood",
+        "Status updates were clear enough for a non-engineer to follow",
+        "Postmortem includes a timeline and at least 2 concrete action items"
+      ]
+    }
+  },
+  "appsec": {
+    title: "Application Security (OWASP)", category: "Security", rubric: [3, 3, 2],
+    reqs: [
+      "Prevent the OWASP Top 10: injection, broken access control, XSS, SSRF",
+      "Implement authentication, authorization and session handling correctly",
+      "Handle secrets, input validation and dependency vulnerabilities"
+    ],
+    trap: "AI-generated code is functional and often insecure: string-built SQL, missing authorization checks, secrets in code. It passes every happy-path test, so students never see the vulnerability until someone exploits it.",
+    flags: [
+      "You check that a user is logged in but not that they own the resource",
+      "You've never tried to break your own app"
+    ],
+    challenge: {
+      title: "Attack Your Own App",
+      time: 45,
+      prompt: "Run OWASP Juice Shop (or your own app) locally. Using only the OWASP cheat sheets, find and exploit at least one SQL injection, one XSS and one broken access control (for example, viewing another user's data). Then write the fix for each in a codebase you control and prove the exploit no longer works.",
+      criteria: [
+        "Three distinct vulnerability classes exploited and documented",
+        "Fixes use parameterized queries, output encoding and server-side authorization checks",
+        "A regression test for each fix fails before and passes after"
+      ]
+    }
+  },
+  "threat-modeling": {
+    title: "Threat Modeling", category: "Security", rubric: [2, 2, 2],
+    reqs: [
+      "Map a system's data flows, trust boundaries and assets",
+      "Identify threats systematically (STRIDE or similar)",
+      "Prioritize mitigations by likelihood and impact"
+    ],
+    trap: "Ask an AI for a threat model and you get a generic list that applies to every system. Students hand it in without ever drawing a data flow, so they miss the threats specific to their system, which are the only ones that matter.",
+    flags: [
+      "Your threat list would fit any web app unchanged",
+      "You can't point to where the trust boundaries are in your own system"
+    ],
+    challenge: {
+      title: "STRIDE a Real System",
+      time: 40,
+      prompt: "Pick a system you know (your school's login portal or an app you built). Draw its data-flow diagram by hand with trust boundaries. Apply STRIDE to each boundary crossing and list at least 8 specific threats, then rank the top 3 and propose a mitigation for each.",
+      criteria: [
+        "The diagram shows every place data crosses a trust boundary",
+        "Every threat references a specific component or flow, not a generic category",
+        "Mitigations are concrete and proportionate to the risk"
+      ]
+    }
+  },
+  "detection": {
+    title: "Logging, SIEM & Detection", category: "Security", rubric: [2, 3, 1],
+    reqs: [
+      "Collect and query security logs (auth, cloud audit, endpoint)",
+      "Write detection rules and tune them to reduce false positives",
+      "Investigate alerts and reconstruct an attacker's timeline"
+    ],
+    trap: "AI can draft a detection query in seconds, but it can't know your log schema or your normal baseline. Students ship rules that never fire or fire constantly, and can't tell which, because they never looked at the raw logs.",
+    flags: [
+      "You've written a detection rule without testing it against real attack data",
+      "You can't describe what 'normal' looks like in your logs"
+    ],
+    challenge: {
+      title: "Hunt in Real Logs",
+      time: 45,
+      prompt: "Load a public attack dataset (for example, Splunk's Boss of the SOC or the Mordor/OTRF datasets) into a free SIEM or plain grep/jq. Without AI, answer: when did the attacker get initial access, how did they move laterally, and what did they take? Then write one detection rule that would have caught the first step.",
+      criteria: [
+        "Timeline of initial access, lateral movement and exfiltration with evidence",
+        "Your rule fires on the attack data",
+        "Your rule fires fewer than 5 times on a day of benign data"
+      ]
+    }
+  },
+  "test-automation": {
+    title: "Test Automation (Playwright/Selenium)", category: "Quality", rubric: [3, 3, 1],
+    reqs: [
+      "Write end-to-end tests with Playwright, Cypress or Selenium",
+      "Use stable selectors, fixtures and test data management",
+      "Eliminate flakiness and run suites in CI"
+    ],
+    trap: "AI generates E2E tests with brittle CSS selectors and fixed `sleep()` calls. They pass on the first run, then flake in CI. Students who didn't write them can't tell a real failure from a timing issue, so the team learns to ignore red builds.",
+    flags: [
+      "Your tests use `sleep` or fixed waits",
+      "You rerun failing tests until they pass"
+    ],
+    challenge: {
+      title: "Zero-Flake Suite",
+      time: 45,
+      prompt: "Using only the Playwright (or Cypress) docs, write E2E tests for a real web app's sign-up, login and one core flow. Use role- or test-id-based selectors and no fixed waits. Run the suite 20 times in a row locally and 5 times in CI.",
+      criteria: [
+        "25 of 25 runs green, with zero flaky failures",
+        "No `sleep` or `waitForTimeout` calls anywhere",
+        "Each test sets up and cleans up its own data"
+      ]
+    }
+  },
+  "c-cpp": {
+    title: "C / C++ & Memory Management", category: "Programming", rubric: [3, 3, 3],
+    reqs: [
+      "Work with pointers, the stack vs. the heap, and manual memory management",
+      "Avoid undefined behavior: buffer overflows, use-after-free, data races",
+      "Use RAII, smart pointers and tools like Valgrind and sanitizers"
+    ],
+    trap: "AI-written C compiles and seems to run, while hiding off-by-one buffer overflows and memory leaks that only show up under load or on hardware. In C, 'it works on my machine' is the most dangerous kind of passing test.",
+    flags: [
+      "You've never run your C code under AddressSanitizer or Valgrind",
+      "You can't draw the memory layout of a struct with padding"
+    ],
+    challenge: {
+      title: "Implement and Sanitize",
+      time: 45,
+      prompt: "In C, with only man pages and no completion: implement a growable array (push, get, free) and a function that splits a string by a delimiter into newly allocated strings. Write tests, then run everything under AddressSanitizer and Valgrind. Finally, draw the stack and heap state after splitting 'a,b,c'.",
+      criteria: [
+        "Zero leaks and zero ASan errors",
+        "Handles empty strings, trailing delimiters and allocation failure",
+        "Your memory drawing matches what a debugger shows"
+      ]
+    }
+  },
+  "embedded-hw": {
+    title: "Microcontrollers & Hardware Interfaces", category: "Embedded", rubric: [1, 2, 2],
+    reqs: [
+      "Program microcontrollers (ARM Cortex-M, ESP32) and read datasheets",
+      "Use GPIO, timers, interrupts and serial buses (UART, I2C, SPI)",
+      "Debug with a logic analyzer, an oscilloscope and JTAG/SWD"
+    ],
+    trap: "AI confidently invents register names and peripheral configurations that don't exist on your chip. Students who don't check the datasheet lose days to code that compiles perfectly and does nothing on real hardware.",
+    flags: [
+      "You've never opened your microcontroller's datasheet or reference manual",
+      "You debug hardware issues only with print statements"
+    ],
+    challenge: {
+      title: "Datasheet-Only Driver",
+      time: 60,
+      prompt: "With only the datasheets for your board and an I2C sensor (for example, a temperature sensor), write a driver that reads the sensor every second and prints values over UART. Don't use a vendor library for the sensor. Capture the I2C transaction with a logic analyzer and annotate it.",
+      criteria: [
+        "Driver returns correct readings in real units",
+        "Annotated capture shows the address, register and data bytes matching your code",
+        "Every register address in your code is cited to a datasheet page"
+      ]
+    }
+  },
+  "rtos": {
+    title: "Real-Time Systems & RTOS", category: "Embedded", rubric: [2, 3, 2],
+    reqs: [
+      "Use RTOS primitives: tasks, priorities, queues, semaphores, mutexes",
+      "Write safe interrupt service routines and share data with tasks",
+      "Reason about timing, deadlines and priority inversion"
+    ],
+    trap: "AI-generated RTOS code often works in a demo but contains race conditions, blocking calls inside ISRs or priority inversions that only appear under real timing. These bugs are intermittent, so students blame hardware instead of their design.",
+    flags: [
+      "You've called a blocking function from inside an interrupt handler",
+      "You can't explain priority inversion with an example"
+    ],
+    challenge: {
+      title: "Timing Under Load",
+      time: 50,
+      prompt: "On FreeRTOS or Zephyr, build three tasks: a 1kHz sensor sampler driven by an interrupt, a processing task and a logger. Pass data with queues. Measure the sampler's jitter with a GPIO toggle and a scope, then add a CPU-heavy task and keep jitter under 50µs.",
+      criteria: [
+        "The ISR does minimal work and defers processing to a task",
+        "Jitter measured on a scope, before and after load, stays under 50µs",
+        "You identified and fixed at least one priority or sharing issue"
+      ]
+    }
+  },
+  "os-concepts": {
+    title: "Operating Systems & Concurrency", category: "CS Fundamentals", rubric: [2, 2, 3],
+    reqs: [
+      "Explain processes, threads, scheduling and context switches",
+      "Understand virtual memory, paging, file systems and syscalls",
+      "Use locks, condition variables and atomics; avoid deadlock"
+    ],
+    trap: "OS concepts are where AI-reliant students get exposed in interviews: 'what happens when you call `fork()`?' or 'why does this deadlock?' can't be prompted mid-interview, and AI explanations don't stick unless you build something.",
+    flags: [
+      "You can't explain the difference between a process and a thread",
+      "You've never deliberately caused, then fixed, a deadlock"
+    ],
+    challenge: {
+      title: "Build a Tiny Shell",
+      time: 60,
+      prompt: "In C or Rust, with only man pages: write a mini shell that runs commands with `fork`/`exec`, supports one pipe (`ls | wc -l`) and handles Ctrl-C correctly. Then write a two-thread program that deadlocks, explain why on paper, and fix it with lock ordering.",
+      criteria: [
+        "Pipes and Ctrl-C behave like a real shell (no zombie processes)",
+        "Your deadlock explanation names the four Coffman conditions involved",
+        "The fix is justified, not just 'added a timeout'"
+      ]
+    }
+  },
+  "mobile-native": {
+    title: "Swift / Kotlin Fundamentals", category: "Mobile", rubric: [3, 2, 2],
+    reqs: [
+      "Write idiomatic Swift (iOS) or Kotlin (Android): optionals/null safety, value types, closures",
+      "Build declarative UIs with SwiftUI or Jetpack Compose",
+      "Use the platform SDKs, permissions and navigation patterns"
+    ],
+    trap: "AI mixes outdated and current APIs (UIKit with SwiftUI, Views with Compose) and force-unwraps optionals freely. Students ship apps that crash on edge cases and can't explain the language features they're using.",
+    flags: [
+      "Your Swift is full of `!` force unwraps, or your Kotlin of `!!`",
+      "You can't tell which code came from a deprecated API"
+    ],
+    challenge: {
+      title: "Offline Notes App",
+      time: 60,
+      prompt: "Using only Apple's or Android's official docs, build a notes app in SwiftUI or Compose: list, create, edit and delete notes, persisted locally, with a search filter. No force unwraps and no third-party libraries.",
+      criteria: [
+        "Survives rotation, backgrounding and app restart with no data loss",
+        "Zero force unwraps (`!` / `!!`) in your code",
+        "You can explain every state property wrapper or state holder you used"
+      ]
+    }
+  },
+  "mobile-arch": {
+    title: "Mobile App Architecture", category: "Mobile", rubric: [2, 2, 2],
+    reqs: [
+      "Structure apps with MVVM or similar, and separate UI from data",
+      "Handle the app lifecycle, background work and offline-first data",
+      "Manage dependencies and keep code testable"
+    ],
+    trap: "AI scaffolds 'clean architecture' with repositories, use cases and DI containers for a two-screen app. Students can't explain what each layer is for, and the app still loses state when the OS kills it in the background.",
+    flags: [
+      "Your app loses data when the OS kills it in the background",
+      "You can't say which layer owns a given piece of state"
+    ],
+    challenge: {
+      title: "Survive Process Death",
+      time: 45,
+      prompt: "Take an app you've built. Enable 'Don't keep activities' (Android) or simulate a memory-pressure kill (iOS) and walk through every screen mid-task. Draw your architecture on paper showing where each piece of state lives, then fix every place state was lost.",
+      criteria: [
+        "No state or input lost after a forced process kill on any screen",
+        "Your diagram shows a single owner for each piece of state",
+        "ViewModels or state holders are unit-tested without the UI"
+      ]
+    }
+  },
+  "llm-apps": {
+    title: "LLM APIs & Prompt Design", category: "AI", rubric: [3, 3, 1],
+    reqs: [
+      "Call LLM APIs with structured outputs, tool/function calling and streaming",
+      "Design prompts and system instructions, and version them",
+      "Handle cost, latency, rate limits and prompt injection"
+    ],
+    trap: "It's easy to build an LLM demo that works on five examples. Students let AI write both the app and the prompts, never test on messy real inputs, and don't notice that a user can override the instructions by typing 'ignore previous instructions'.",
+    flags: [
+      "You've only tested your prompt on examples you wrote yourself",
+      "You parse model output with regex instead of structured outputs"
+    ],
+    challenge: {
+      title: "Ship a Robust Extractor",
+      time: 50,
+      prompt: "Using only the provider's API docs, build a script that extracts structured fields (name, date, amount) from messy real text like emails or receipts into validated JSON. Collect 30 real examples, including 5 adversarial ones containing prompt-injection attempts. Measure accuracy, cost and latency.",
+      criteria: [
+        "Output always validates against your schema (it's retried or failed explicitly otherwise)",
+        "Accuracy reported on all 30 examples, with failures categorized",
+        "No adversarial example changes the model's task"
+      ]
+    }
+  },
+  "rag": {
+    title: "Retrieval-Augmented Generation (RAG)", category: "AI", rubric: [3, 3, 1],
+    reqs: [
+      "Chunk, embed and index documents in a vector store",
+      "Combine semantic and keyword search, and rerank results",
+      "Ground answers in sources with citations and handle 'not found'"
+    ],
+    trap: "Tutorials and AI assistants make RAG look like 20 lines of code. Students never check whether retrieval found the right passage, so the model answers confidently from the wrong chunk and nobody notices.",
+    flags: [
+      "You've never inspected which chunks were retrieved for a query",
+      "Your system never says 'I don't know'"
+    ],
+    challenge: {
+      title: "Measure Retrieval First",
+      time: 60,
+      prompt: "Build a RAG system over a document set you know well (course notes or a project's docs). Before generating any answers, hand-write 25 questions with the correct source passage for each. Measure retrieval recall@5, then improve it by changing chunking or adding keyword search.",
+      criteria: [
+        "Recall@5 measured before and after your change, with numbers",
+        "Answers cite the passage they used",
+        "Correctly answers 'not in the documents' for 5 out-of-scope questions"
+      ]
+    }
+  },
+  "llm-evals": {
+    title: "LLM Evaluation & Guardrails", category: "AI", rubric: [2, 3, 2],
+    reqs: [
+      "Build eval sets and automated graders for LLM features",
+      "Detect regressions when prompts or models change",
+      "Add guardrails for safety, hallucination and format errors"
+    ],
+    trap: "Most LLM apps are 'vibe-checked': the developer tries a few prompts and ships. Using an LLM to grade an LLM without checking the grader is the same trap one level up, because the scores look rigorous while measuring nothing.",
+    flags: [
+      "You change prompts without rerunning a fixed test set",
+      "You trust an LLM-as-judge score you've never compared with human labels"
+    ],
+    challenge: {
+      title: "Grade the Grader",
+      time: 45,
+      prompt: "For an LLM feature you built, write 40 test cases with expected behavior. Hand-label the outputs as pass or fail yourself. Then build an automated grader (rules or LLM-as-judge) and measure how often it agrees with your labels. Change the prompt and use the eval to decide whether to ship.",
+      criteria: [
+        "40 hand-labeled cases, including edge cases and adversarial inputs",
+        "Grader agreement with human labels measured and above 85%",
+        "Your ship/no-ship decision is justified with eval numbers"
+      ]
+    }
   }
 };
 
 window.ROLES = [
   {
     id: "junior-data-analyst", title: "Junior Data Analyst", level: "Entry level",
+    aliases: ["Data Analyst", "Product Analyst", "Analytics Analyst", "Entry Level Data Analyst"],
     keywords: ["data", "analyst", "analytics", "sql", "excel", "junior", "reporting"],
     summary: "Turn raw data into answers for business teams using SQL, spreadsheets and Python.",
     stages: [
@@ -806,6 +1382,7 @@ window.ROLES = [
   },
   {
     id: "junior-python-developer", title: "Junior Python Developer", level: "Entry level",
+    aliases: ["Python Developer", "Python Engineer", "Python Programmer"],
     keywords: ["python", "developer", "software", "engineer", "junior", "programmer", "coding"],
     summary: "Build and maintain Python services, scripts and integrations on a software team.",
     stages: [
@@ -817,6 +1394,7 @@ window.ROLES = [
   },
   {
     id: "data-engineer", title: "Data Engineer", level: "Entry–mid level",
+    aliases: ["Junior Data Engineer", "Big Data Engineer", "ETL Developer", "Data Platform Engineer"],
     keywords: ["data", "engineer", "etl", "pipeline", "spark", "airflow", "warehouse", "big data"],
     summary: "Build the pipelines and warehouses that every analyst and model depends on.",
     stages: [
@@ -828,6 +1406,7 @@ window.ROLES = [
   },
   {
     id: "bi-analyst", title: "Business Intelligence Analyst", level: "Entry level",
+    aliases: ["BI Analyst", "Business Intelligence Developer", "Power BI Developer", "Tableau Developer", "Reporting Analyst"],
     keywords: ["business", "intelligence", "bi", "analyst", "power bi", "tableau", "dashboard", "reporting", "data"],
     summary: "Design dashboards and data models that help leaders make decisions.",
     stages: [
@@ -839,6 +1418,7 @@ window.ROLES = [
   },
   {
     id: "ml-engineer", title: "Machine Learning Engineer", level: "Entry–mid level",
+    aliases: ["ML Engineer", "MLE", "MLOps Engineer", "Machine Learning Developer"],
     keywords: ["ml", "machine learning", "engineer", "ai", "deep learning", "pytorch", "mlops", "model"],
     summary: "Train, ship and maintain machine learning models in production systems.",
     stages: [
@@ -850,6 +1430,7 @@ window.ROLES = [
   },
   {
     id: "data-scientist", title: "Junior Data Scientist", level: "Entry level",
+    aliases: ["Data Scientist", "Entry Level Data Scientist", "Applied Scientist"],
     keywords: ["data", "scientist", "science", "ml", "machine learning", "statistics", "python", "junior"],
     summary: "Use statistics and machine learning to answer open-ended business questions.",
     stages: [
@@ -861,6 +1442,7 @@ window.ROLES = [
   },
   {
     id: "backend-developer", title: "Backend Developer (Python)", level: "Entry–mid level",
+    aliases: ["Backend Engineer", "Back-End Developer", "Python Backend Engineer", "Django Developer", "API Developer"],
     keywords: ["backend", "back-end", "developer", "api", "python", "server", "software", "engineer", "web"],
     summary: "Design APIs, databases and services that power web and mobile apps.",
     stages: [
@@ -872,6 +1454,7 @@ window.ROLES = [
   },
   {
     id: "analytics-engineer", title: "Analytics Engineer", level: "Entry–mid level",
+    aliases: ["dbt Developer", "Analytics Engineering"],
     keywords: ["analytics", "engineer", "dbt", "sql", "data", "modeling", "warehouse"],
     summary: "Bridge analysis and engineering by building tested, documented data models.",
     stages: [
@@ -879,6 +1462,138 @@ window.ROLES = [
       { name: "Core Toolkit", skills: ["sql-joins", "sql-window", "data-modeling"] },
       { name: "Applied Engineering", skills: ["etl", "testing", "data-cleaning"] },
       { name: "Job-Ready", skills: ["bi-tools", "airflow", "cloud"] }
+    ]
+  },
+  {
+    id: "software-engineer", title: "Software Engineer", level: "Entry level",
+    aliases: ["New Grad Software Engineer", "Junior Software Engineer", "Software Developer", "SWE", "Junior Developer", "Programmer"],
+    keywords: ["software", "engineer", "developer", "swe", "new grad", "junior", "programmer", "coding", "entry"],
+    summary: "Design, build and ship software on a product team, with strong CS fundamentals.",
+    stages: [
+      { name: "Foundations", skills: ["python-core", "git", "cli"] },
+      { name: "Core CS", skills: ["dsa", "oop", "os-concepts"] },
+      { name: "Applied Engineering", skills: ["testing", "debugging", "db-design", "api-build"] },
+      { name: "Job-Ready", skills: ["system-design", "ci-cd", "storytelling"] }
+    ]
+  },
+  {
+    id: "frontend-developer", title: "Frontend Developer", level: "Entry–mid level",
+    aliases: ["Front-End Engineer", "Frontend Engineer", "UI Engineer", "React Developer", "Web Developer", "JavaScript Developer"],
+    keywords: ["frontend", "front-end", "front", "ui", "web", "react", "javascript", "typescript", "css", "developer", "engineer"],
+    summary: "Build fast, accessible user interfaces for the web.",
+    stages: [
+      { name: "Foundations", skills: ["html-css", "javascript", "git"] },
+      { name: "Core Toolkit", skills: ["react", "accessibility", "api"] },
+      { name: "Applied Engineering", skills: ["testing", "web-perf", "debugging"] },
+      { name: "Job-Ready", skills: ["ci-cd", "system-design"] }
+    ]
+  },
+  {
+    id: "fullstack-developer", title: "Full-Stack Developer", level: "Entry–mid level",
+    aliases: ["Full Stack Engineer", "Fullstack Engineer", "Full-Stack Web Developer"],
+    keywords: ["full", "stack", "fullstack", "full-stack", "web", "developer", "engineer", "react", "node", "javascript"],
+    summary: "Own features end to end, from the database and API to the user interface.",
+    stages: [
+      { name: "Foundations", skills: ["html-css", "javascript", "git"] },
+      { name: "Core Toolkit", skills: ["react", "api-build", "db-design"] },
+      { name: "Applied Engineering", skills: ["testing", "sql-basics", "appsec"] },
+      { name: "Job-Ready", skills: ["docker", "ci-cd", "system-design"] }
+    ]
+  },
+  {
+    id: "mobile-developer", title: "Mobile Developer (iOS / Android)", level: "Entry–mid level",
+    aliases: ["iOS Developer", "iOS Engineer", "Android Developer", "Android Engineer", "Mobile Engineer", "Swift Developer", "Kotlin Developer"],
+    keywords: ["mobile", "ios", "android", "swift", "kotlin", "app", "developer", "engineer", "flutter", "react native"],
+    summary: "Build native apps for iPhone and Android that are fast, reliable and accessible.",
+    stages: [
+      { name: "Foundations", skills: ["mobile-native", "git", "oop"] },
+      { name: "Core Toolkit", skills: ["mobile-arch", "api", "async"] },
+      { name: "Applied Engineering", skills: ["testing", "debugging", "accessibility"] },
+      { name: "Job-Ready", skills: ["ci-cd", "system-design"] }
+    ]
+  },
+  {
+    id: "devops-engineer", title: "DevOps Engineer", level: "Entry–mid level",
+    aliases: ["Platform Engineer", "Infrastructure Engineer", "Build & Release Engineer", "DevSecOps Engineer"],
+    keywords: ["devops", "platform", "infrastructure", "ci", "cd", "kubernetes", "terraform", "docker", "engineer", "ops"],
+    summary: "Automate how software is built, deployed and run in production.",
+    stages: [
+      { name: "Foundations", skills: ["cli", "networking", "git"] },
+      { name: "Core Toolkit", skills: ["python-core", "docker", "ci-cd"] },
+      { name: "Applied Infrastructure", skills: ["cloud", "iac", "kubernetes"] },
+      { name: "Job-Ready", skills: ["observability", "incident-response"] }
+    ]
+  },
+  {
+    id: "sre", title: "Site Reliability Engineer", level: "Entry–mid level",
+    aliases: ["SRE", "Production Engineer", "Reliability Engineer"],
+    keywords: ["sre", "site", "reliability", "production", "on-call", "infrastructure", "operations", "engineer", "ops"],
+    summary: "Keep large systems fast and available, and automate away operational toil.",
+    stages: [
+      { name: "Foundations", skills: ["cli", "networking", "os-concepts"] },
+      { name: "Core Toolkit", skills: ["python-core", "docker", "observability"] },
+      { name: "Applied Infrastructure", skills: ["kubernetes", "cloud", "iac"] },
+      { name: "Job-Ready", skills: ["incident-response", "system-design", "debugging"] }
+    ]
+  },
+  {
+    id: "cloud-engineer", title: "Cloud Engineer", level: "Entry–mid level",
+    aliases: ["AWS Engineer", "Azure Engineer", "GCP Engineer", "Cloud Infrastructure Engineer", "Cloud Developer"],
+    keywords: ["cloud", "aws", "azure", "gcp", "infrastructure", "terraform", "engineer", "architect"],
+    summary: "Design and run infrastructure on AWS, Azure or Google Cloud.",
+    stages: [
+      { name: "Foundations", skills: ["cli", "networking", "git"] },
+      { name: "Core Toolkit", skills: ["cloud", "iac", "docker"] },
+      { name: "Applied Infrastructure", skills: ["kubernetes", "ci-cd", "appsec"] },
+      { name: "Job-Ready", skills: ["observability", "system-design"] }
+    ]
+  },
+  {
+    id: "security-engineer", title: "Security Engineer", level: "Entry–mid level",
+    aliases: ["Cybersecurity Analyst", "Application Security Engineer", "SOC Analyst", "Detection Engineer", "Information Security Engineer", "Cyber Security Engineer"],
+    keywords: ["security", "cyber", "cybersecurity", "appsec", "infosec", "soc", "detection", "analyst", "engineer", "pentest"],
+    summary: "Find and fix vulnerabilities, detect attacks and help teams build securely.",
+    stages: [
+      { name: "Foundations", skills: ["networking", "cli", "python-core"] },
+      { name: "Core Security", skills: ["appsec", "threat-modeling", "os-concepts"] },
+      { name: "Applied Security", skills: ["cloud", "detection", "iac"] },
+      { name: "Job-Ready", skills: ["incident-response", "storytelling"] }
+    ]
+  },
+  {
+    id: "qa-engineer", title: "QA / Test Automation Engineer", level: "Entry–mid level",
+    aliases: ["SDET", "QA Engineer", "Quality Assurance Engineer", "Test Engineer", "Automation Engineer", "Software Engineer in Test"],
+    keywords: ["qa", "quality", "assurance", "test", "testing", "automation", "sdet", "selenium", "playwright", "engineer"],
+    summary: "Build automated test suites that let teams ship quickly without breaking things.",
+    stages: [
+      { name: "Foundations", skills: ["javascript", "git", "testing"] },
+      { name: "Core Toolkit", skills: ["test-automation", "api", "sql-basics"] },
+      { name: "Applied Quality", skills: ["ci-cd", "debugging", "docker"] },
+      { name: "Job-Ready", skills: ["accessibility", "storytelling"] }
+    ]
+  },
+  {
+    id: "embedded-engineer", title: "Embedded Software Engineer", level: "Entry–mid level",
+    aliases: ["Firmware Engineer", "Embedded Developer", "Embedded Systems Engineer", "IoT Engineer"],
+    keywords: ["embedded", "firmware", "c", "c++", "microcontroller", "rtos", "hardware", "iot", "engineer"],
+    summary: "Write the software that runs on hardware, from microcontrollers to robots and cars.",
+    stages: [
+      { name: "Foundations", skills: ["c-cpp", "cli", "git"] },
+      { name: "Core Toolkit", skills: ["os-concepts", "embedded-hw", "debugging"] },
+      { name: "Applied Embedded", skills: ["rtos", "testing", "python-core"] },
+      { name: "Job-Ready", skills: ["ci-cd", "storytelling"] }
+    ]
+  },
+  {
+    id: "ai-engineer", title: "AI Engineer (LLM Applications)", level: "Entry–mid level",
+    aliases: ["AI Engineer", "LLM Engineer", "Generative AI Engineer", "GenAI Developer", "Applied AI Engineer", "Prompt Engineer"],
+    keywords: ["ai", "llm", "genai", "generative", "gpt", "rag", "agents", "prompt", "applied", "engineer", "developer"],
+    summary: "Build products on top of large language models: retrieval, agents and evaluation.",
+    stages: [
+      { name: "Foundations", skills: ["python-core", "api", "git"] },
+      { name: "Core Toolkit", skills: ["llm-apps", "rag", "api-build"] },
+      { name: "Applied AI", skills: ["llm-evals", "testing", "async"] },
+      { name: "Job-Ready", skills: ["docker", "cloud", "appsec"] }
     ]
   }
 ];
