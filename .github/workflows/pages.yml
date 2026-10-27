@@ -28,6 +28,7 @@ jobs:
         run: |
           mkdir _site
           cp index.html app.js data.js styles.css _site/
+          [ -f jobs-data.js ] && cp jobs-data.js _site/ || true
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
