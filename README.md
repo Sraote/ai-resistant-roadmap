@@ -6,13 +6,15 @@ An interactive tool for Computer Science and Data Science students: search a job
 
 ## Flow
 
-1. **Search** — type a role (e.g. "Junior Data Analyst", "Python Developer", "ML Engineer").
+1. **Search** — type a role; the bar autocompletes the closest match inline (Tab or → to accept) and lists suggestions, matching alternate titles ("SDET", "iOS Developer") and typos.
 2. **Select your role** — pick from matching role cards.
 3. **Generating** — a short transition while the roadmap is assembled.
 4. **Roadmap dashboard** — a staged flowchart of skills. Click any node for:
    - 📋 **Key Technical Requirements**: how many real postings for the role mention the skill, with quoted excerpts linked to the original listings
    - ⚠️ **The AI Trap** — how students shortcut the skill, plus warning signs
    - 🛡️ **The Independent Verification Challenge** — a timed, off-AI drill with pass criteria you check off to mark the skill verified
+
+19 roles across data, software, web, mobile, infrastructure, security, QA, embedded and AI.
 
 Extras: dark/light mode, filters (high AI-risk, not yet verified), a challenge timer, keyboard navigation (← → Esc), and progress saved in your browser.
 

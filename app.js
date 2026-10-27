@@ -59,28 +59,162 @@
     try { localStorage.setItem('air:theme', dark ? 'dark' : 'light'); } catch (e) {}
   });
 
-  // ---------- search ----------
-  function searchRoles(q) {
-    const query = q.trim().toLowerCase();
-    if (!query) return { matches: ROLES.slice(), exact: true, all: true };
-    const tokens = query.split(/[\s,/]+/).filter((t) => t.length > 1);
-    const scored = ROLES.map((r) => {
-      const title = r.title.toLowerCase();
-      let s = title.includes(query) ? 10 : 0;
-      tokens.forEach((t) => {
-        if (title.includes(t)) s += 3;
-        if (r.keywords.some((k) => k === t)) s += 2;
-        else if (r.keywords.some((k) => k.includes(t) || t.includes(k))) s += 1;
-        // skill-level match, e.g. "pandas" or "airflow"
-        r.stages.forEach((st) => st.skills.forEach((id) => {
-          if (SKILLS[id].title.toLowerCase().includes(t)) s += 0.5;
-        }));
-      });
-      return { r, s };
-    }).filter((x) => x.s > 0).sort((a, b) => b.s - a.s);
-    if (!scored.length) return { matches: ROLES.slice(), exact: false, all: true };
-    return { matches: scored.map((x) => x.r), exact: true, all: false };
+  // ---------- search & autocomplete ----------
+  const norm = (t) => t.toLowerCase().replace(/[^a-z0-9+#]+/g, ' ').trim();
+  const wordsOf = (t) => norm(t).split(' ').filter(Boolean);
+  // Damerau–Levenshtein distance (with transpositions), for typo tolerance.
+  function editDist(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+      const c = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + c);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+    }
+    return d[a.length][b.length];
   }
+  // Does query token t (possibly mid-typing, possibly misspelled) match word w?
+  function tokenMatch(t, w) {
+    if (w.startsWith(t)) return 2;
+    if (t.length < 3) return 0;
+    const allowed = t.length >= 6 ? 2 : 1;
+    // compare against the word and against the word's prefix of similar length (still typing)
+    const cands = [w, w.slice(0, t.length), w.slice(0, t.length + 1)];
+    return cands.some((c) => editDist(t, c) <= allowed) ? 1 : 0;
+  }
+  const CANDS = ROLES.flatMap((r) => [r.title, ...(r.aliases || [])].map((text) => ({ text, role: r, words: wordsOf(text) })));
+
+  // Rank roles for a (partial) query. Returns [{ role, text, score, prefix }] best first.
+  function suggest(raw) {
+    const q = raw.replace(/^\s+/, '');
+    const qn = norm(q);
+    if (!qn) return [];
+    const toks = qn.split(' ');
+    const best = new Map();
+    const consider = (role, text, score, prefix) => {
+      const cur = best.get(role.id);
+      if (!cur || score > cur.score) best.set(role.id, { role, text, score, prefix });
+    };
+    CANDS.forEach((c) => {
+      const lower = c.text.toLowerCase();
+      if (lower.startsWith(q.toLowerCase())) return consider(c.role, c.text, 100 - c.text.length * 0.05 + (c.text === c.role.title ? 0.5 : 0), true);
+      const m = toks.map((t) => Math.max(0, ...c.words.map((w) => tokenMatch(t, w))));
+      if (m.every((x) => x === 2)) return consider(c.role, c.text, 80 - c.text.length * 0.05, false);
+      if (lower.includes(qn)) return consider(c.role, c.text, 65, false);
+      if (m.every((x) => x > 0)) return consider(c.role, c.text, 50 - m.filter((x) => x === 1).length * 3, false);
+    });
+    ROLES.forEach((r) => {
+      let k = 0;
+      toks.forEach((t) => {
+        if (r.keywords.some((kw) => tokenMatch(t, kw) === 2)) k += 6;
+        r.stages.forEach((st) => st.skills.forEach((id) => { if (t.length > 2 && wordsOf(SKILLS[id].title).some((w) => w.startsWith(t))) k += 2; }));
+      });
+      if (k) consider(r, r.title, Math.min(40, k), false);
+    });
+    const ranked = [...best.values()].sort((a, b) => b.score - a.score);
+    // Drop weak tail matches (e.g. a role that only lists a matching skill) when a strong match exists.
+    return ranked.filter((r) => r.score >= ranked[0].score * 0.25);
+  }
+
+  function searchRoles(q) {
+    if (!q.trim()) return { matches: ROLES.slice(), exact: true, all: true };
+    const res = suggest(q);
+    if (!res.length) return { matches: ROLES.slice(), exact: false, all: true };
+    return { matches: res.map((x) => x.role), exact: true, all: false };
+  }
+
+  // Wires an input as a combobox: inline ghost completion + suggestion list.
+  function attachAutocomplete(root, { onSubmit, onPick }) {
+    const input = root.querySelector('input');
+    const ghost = root.querySelector('[data-ghost]');
+    const list = root.querySelector('[role="listbox"]');
+    let results = [], active = -1, completion = '';
+
+    const markPrefix = (text, q) => {
+      const n = q.length;
+      return text.toLowerCase().startsWith(q.toLowerCase())
+        ? `<span class="font-semibold">${esc(text.slice(0, n))}</span>${esc(text.slice(n))}` : esc(text);
+    };
+    function render() {
+      const q = input.value;
+      results = q.trim() ? suggest(q).slice(0, 6) : [];
+      const top = results[0];
+      completion = '';
+      ghost.innerHTML = '';
+      if (top && document.activeElement === input && input.selectionStart === q.length) {
+        if (top.prefix && top.text.length > q.replace(/^\s+/, '').length) {
+          completion = top.text;
+          const lead = q.match(/^\s*/)[0];
+          ghost.innerHTML = `<span class="invisible">${esc(q)}</span><span class="text-slate-400 dark:text-slate-500">${esc(top.text.slice(q.length - lead.length))}</span>`;
+        } else if (!top.prefix && top.score >= 45) {
+          completion = top.text;
+          ghost.innerHTML = `<span class="invisible">${esc(q)}</span><span class="text-slate-400 dark:text-slate-500">  → ${esc(top.text)}</span>`;
+        }
+        if (input.scrollWidth > input.clientWidth + 1) ghost.innerHTML = '';
+      }
+      active = -1;
+      list.innerHTML = results.map((r, i) => {
+        const rd = roleData(r.role.id);
+        const sub = [r.text !== r.role.title ? `Matches “${esc(r.text)}”` : '', rd ? `${rd.n.toLocaleString()} live postings` : ''].filter(Boolean).join(' · ');
+        return `<li role="option" id="${list.id}-${i}" data-i="${i}" aria-selected="false"
+            class="cursor-pointer px-4 py-2.5 flex items-center justify-between gap-3 text-left aria-selected:bg-indigo-50 dark:aria-selected:bg-indigo-500/15 hover:bg-slate-50 dark:hover:bg-slate-800/70">
+            <span class="min-w-0"><span class="block truncate text-slate-900 dark:text-slate-100">${markPrefix(r.role.title, q.trim())}</span>
+            ${sub ? `<span class="block truncate text-xs text-slate-500">${sub}</span>` : ''}</span>
+            <span class="shrink-0 text-xs text-slate-400">↵</span></li>`;
+      }).join('');
+      const open = results.length > 0 && document.activeElement === input;
+      list.classList.toggle('hidden', !open);
+      input.setAttribute('aria-expanded', open);
+      input.removeAttribute('aria-activedescendant');
+    }
+    function setActive(i) {
+      active = i;
+      list.querySelectorAll('[role="option"]').forEach((li, k) => li.setAttribute('aria-selected', k === i));
+      if (i >= 0) input.setAttribute('aria-activedescendant', `${list.id}-${i}`);
+    }
+    function accept() {
+      if (!completion) return false;
+      input.value = completion;
+      input.setSelectionRange(completion.length, completion.length);
+      render();
+      return true;
+    }
+    input.addEventListener('input', render);
+    input.addEventListener('focus', render);
+    input.addEventListener('click', render);
+    input.addEventListener('blur', () => setTimeout(() => { list.classList.add('hidden'); ghost.innerHTML = ''; input.setAttribute('aria-expanded', 'false'); }, 150));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && !e.shiftKey && completion) { e.preventDefault(); accept(); }
+      else if (e.key === 'ArrowRight' && completion && input.selectionStart === input.value.length) { e.preventDefault(); accept(); }
+      else if (e.key === 'ArrowDown' && results.length) { e.preventDefault(); setActive((active + 1) % results.length); }
+      else if (e.key === 'ArrowUp' && results.length) { e.preventDefault(); setActive(active <= 0 ? results.length - 1 : active - 1); }
+      else if (e.key === 'Escape') { list.classList.add('hidden'); ghost.innerHTML = ''; completion = ''; }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (active >= 0) return onPick(results[active].role);
+        if (completion) input.value = completion;
+        onSubmit(input.value.trim());
+      }
+    });
+    list.addEventListener('mousedown', (e) => {
+      const li = e.target.closest('[data-i]');
+      if (li) { e.preventDefault(); onPick(results[+li.dataset.i].role); }
+    });
+    root.closest('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      onSubmit((completion || input.value).trim());
+    });
+  }
+  const comboInput = (id, sizeCls, value) => `
+    <div class="relative flex-1 min-w-0">
+      <div data-ghost aria-hidden="true" class="absolute inset-0 ${sizeCls} pointer-events-none whitespace-pre overflow-hidden text-left"></div>
+      <input id="${id}" name="q" value="${esc(value || '')}" autocomplete="off" spellcheck="false"
+        role="combobox" aria-autocomplete="both" aria-expanded="false" aria-controls="${id}-list" aria-label="Search roles"
+        class="relative w-full bg-transparent ${sizeCls} outline-none placeholder:text-slate-400" placeholder="Search your role..." />
+    </div>`;
+  const comboList = (id) => `<ul id="${id}-list" role="listbox" class="hidden absolute left-0 right-0 top-full mt-2 z-20 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl shadow-slate-900/10 dark:shadow-black/40 py-1"></ul>`;
+  const goRoles = (q) => { location.hash = '#/roles?q=' + encodeURIComponent(q); };
+  const goRole = (r) => { location.hash = '#/generating/' + r.id; };
 
   // ---------- router ----------
   let genTimer = null;
@@ -111,10 +245,7 @@
         <div class="absolute inset-0 grid-bg [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"></div>
         <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-indigo-500/10 blur-3xl dark:bg-indigo-500/20"></div>
         <div class="relative mx-auto max-w-3xl px-4 pt-20 pb-24 sm:pt-28 sm:pb-32 text-center fade-in">
-          <span class="inline-flex items-center gap-2 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-white/70 dark:bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> For CS &amp; Data Science students
-          </span>
-          <h1 class="mt-6 text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
+          <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05]">
             Learn the skills.<br/><span class="text-indigo-600 dark:text-indigo-400">Prove them without AI.</span>
           </h1>
           <p class="mt-5 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
@@ -124,14 +255,13 @@
             <label for="q" class="sr-only">Search roles</label>
             <div class="flex items-center gap-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-900/5 dark:shadow-black/30 p-2 focus-within:ring-4 focus-within:ring-indigo-500/20 focus-within:border-indigo-400 transition">
               <svg class="w-5 h-5 ml-3 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-              <input id="q" name="q" autocomplete="off" autofocus
-                class="flex-1 min-w-0 bg-transparent py-3 text-base outline-none placeholder:text-slate-400"
-                placeholder="Search your role... (e.g., Junior Data Analyst, Python Developer, ML Engineer)" />
+              ${comboInput('q', 'py-3 text-base')}
               <button type="submit" class="shrink-0 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold px-4 sm:px-6 py-3 transition">
                 <span class="hidden sm:inline">Search</span>
                 <svg class="w-5 h-5 sm:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
               </button>
             </div>
+            ${comboList('q')}
           </form>
           <div class="mt-5 flex flex-wrap justify-center gap-2 text-sm">
             <span class="text-slate-500 py-1">Popular:</span>
@@ -154,10 +284,8 @@
             <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">${d}</p>
           </div>`).join('')}
       </section>`;
-    document.getElementById('searchForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      location.hash = '#/roles?q=' + encodeURIComponent(document.getElementById('q').value.trim());
-    });
+    attachAutocomplete(document.getElementById('searchForm'), { onSubmit: goRoles, onPick: goRole });
+    if (window.matchMedia('(pointer: fine)').matches) document.getElementById('q').focus();
   }
 
   // ---------- Page 2: role selection ----------
@@ -171,10 +299,11 @@
         : `No exact match for <span class="font-medium text-slate-900 dark:text-white">“${esc(q)}”</span> — here are all roles.`;
     app.innerHTML = `
       <section class="mx-auto max-w-6xl px-4 py-10 sm:py-14 fade-in">
-        <form id="refine" class="flex items-center gap-2 max-w-xl rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1.5 focus-within:ring-4 focus-within:ring-indigo-500/20">
+        <form id="refine" class="relative flex items-center gap-2 max-w-xl rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-1.5 focus-within:ring-4 focus-within:ring-indigo-500/20">
           <svg class="w-4 h-4 ml-2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="q2" value="${esc(q)}" class="flex-1 min-w-0 bg-transparent py-2 text-sm outline-none placeholder:text-slate-400" placeholder="Search your role..." />
+          ${comboInput('q2', 'py-2 text-sm', q)}
           <button class="rounded-lg bg-slate-900 dark:bg-slate-700 text-white text-sm font-medium px-3 py-2 hover:bg-slate-700 dark:hover:bg-slate-600">Search</button>
+          ${comboList('q2')}
         </form>
         <h1 class="mt-8 text-3xl sm:text-4xl font-bold tracking-tight">Select your role:</h1>
         <p class="mt-2 text-slate-600 dark:text-slate-400">${note}</p>
@@ -182,10 +311,7 @@
           ${matches.map((r, i) => roleCard(r, i, !all && i === 0)).join('')}
         </div>
       </section>`;
-    document.getElementById('refine').addEventListener('submit', (e) => {
-      e.preventDefault();
-      location.hash = '#/roles?q=' + encodeURIComponent(document.getElementById('q2').value.trim());
-    });
+    attachAutocomplete(document.getElementById('refine'), { onSubmit: goRoles, onPick: goRole });
     app.querySelectorAll('[data-role]').forEach((btn) => btn.addEventListener('click', () => {
       app.querySelectorAll('[data-role]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
       btn.setAttribute('aria-pressed', 'true');
@@ -330,7 +456,7 @@
               `<button data-filter="${k}" role="tab" class="px-3 py-1.5 rounded-lg font-medium transition">${l}</button>`).join('')}
           </div>
           <div class="flex items-center gap-4 text-xs text-slate-500">
-            ${['high', 'medium', 'low'].map((k) => `<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${RISK[k].dot}"></span>${RISK[k].short}<span class="hidden sm:inline">AI-trap risk</span></span>`).join('')}
+            ${['high', 'medium', 'low'].map((k) => `<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${RISK[k].dot}"></span><span>${RISK[k].short}<span class="hidden sm:inline"> AI-trap risk</span></span></span>`).join('')}
           </div>
         </div>
 

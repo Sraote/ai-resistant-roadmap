@@ -1418,7 +1418,7 @@ window.ROLES = [
   },
   {
     id: "ml-engineer", title: "Machine Learning Engineer", level: "Entry–mid level",
-    aliases: ["ML Engineer", "MLE", "MLOps Engineer", "Machine Learning Developer"],
+    aliases: ["ML Engineer", "MLOps Engineer", "Machine Learning Developer"],
     keywords: ["ml", "machine learning", "engineer", "ai", "deep learning", "pytorch", "mlops", "model"],
     summary: "Train, ship and maintain machine learning models in production systems.",
     stages: [

@@ -129,12 +129,15 @@ ROLES = {
         "title": re.compile(r"\bsecurity (engineer|analyst|developer|researcher|operations)|\bappsec\b|application security|"
                             r"product security|detection (and response )?engineer|\bcyber|\bSOC analyst|infosec|offensive security|"
                             r"penetration tester|threat (intelligence|detection)", re.I),
-        "exclude": re.compile(r"\bsales\b|account|\bgrc\b|compliance|physical", re.I),
+        "exclude": re.compile(r"\bsales\b|account|\bgrc\b|compliance|physical|hardware|test engineer", re.I),
     },
     "qa-engineer": {
-        "title": re.compile(r"\bQA\b|quality assurance|quality engineer|test (automation|engineer)|\bSDET\b|engineer in test|"
-                            r"automation (test|qa|engineer)", re.I),
-        "exclude": re.compile(r"marketing automation|sales|\bhardware\b", re.I),
+        "title": re.compile(r"\bQA\b|quality assurance|\bSDET\b|engineer in test|test automation|automation (test|qa) engineer|"
+                            r"software (test|quality)|\bautomation engineer", re.I),
+        "exclude": re.compile(r"marketing automation|sales|hardware|manufacturing|flight|mechanical|electrical|vehicle|"
+                              r"propulsion|supplier|\bsystems? test|\bfield\b", re.I),
+        "requires": re.compile(r"Selenium|Playwright|Cypress|Appium|pytest|JUnit|TestNG|Jest|automated tests?|test automation|"
+                               r"test (frameworks?|plans?|cases?)|regression", re.I),
     },
     "embedded-engineer": {
         "title": re.compile(r"\bembedded\b|\bfirmware\b", re.I),
