@@ -10,7 +10,7 @@ An interactive tool for Computer Science and Data Science students: search a job
 2. **Select your role** — pick from matching role cards.
 3. **Generating** — a short transition while the roadmap is assembled.
 4. **Roadmap dashboard** — a staged flowchart of skills. Click any node for:
-   - 📋 **Key Technical Requirements** drawn from (mock) job descriptions
+   - 📋 **Key Technical Requirements**: how many real postings for the role mention the skill, with quoted excerpts linked to the original listings
    - ⚠️ **The AI Trap** — how students shortcut the skill, plus warning signs
    - 🛡️ **The Independent Verification Challenge** — a timed, off-AI drill with pass criteria you check off to mark the skill verified
 
@@ -18,13 +18,22 @@ Extras: dark/light mode, filters (high AI-risk, not yet verified), a challenge t
 
 ## Stack
 
-Plain HTML, vanilla JavaScript and Tailwind CSS. No backend — all role and skill data is mocked in `data.js`.
+Plain HTML, vanilla JavaScript and Tailwind CSS. No backend.
+
+## Data
+
+- **Job postings (real):** `scripts/collect_jobs.py` pulls every open posting from the public Greenhouse, Lever and Ashby job boards of ~180 tech companies, matches postings to roles by title (senior titles excluded), and counts skill mentions with a keyword taxonomy. It writes `jobs-data.js`. The `refresh-data.yml` workflow runs it every Monday, commits the result and redeploys.
+- **Learning content (editorial):** roadmaps, AI-trap write-ups, verification challenges and the AI-trap risk rubric live in `data.js` and are hand-written. Risk = sum of three 1–3 scores (AI fluency, silent failure, live-tested): 8–9 high, 6–7 medium, 3–5 low.
+
+See the site's Methodology page for details and limitations.
 
 | File | Purpose |
 | --- | --- |
 | `index.html` | Page shell, header, side panel |
 | `app.js` | Hash router, the four pages, roadmap wiring, panel, progress |
-| `data.js` | Mock roles and skills (requirements, AI traps, challenges) |
+| `data.js` | Roles, roadmaps, AI traps, challenges, risk rubric (editorial) |
+| `jobs-data.js` | Generated posting statistics and excerpts (do not edit) |
+| `scripts/collect_jobs.py` | Job-posting collector |
 | `input.css` / `tailwind.config.js` | Tailwind source, compiled to `styles.css` on deploy |
 
 ## Run locally

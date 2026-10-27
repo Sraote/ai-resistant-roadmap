@@ -43,6 +43,22 @@ ASHBY = """openai notion ramp linear replit posthog supabase deel retool mercury
 pinecone cohere runway elevenlabs sierra decagon confluent snowflake hightouch census airbyte
 dagster prefect astronomer motherduck neon planetscale render railway clerk resend""".split()
 
+# Lever and Ashby don't return a company name; map slugs to display names.
+NAMES = {"openai": "OpenAI", "posthog": "PostHog", "elevenlabs": "ElevenLabs", "langchain": "LangChain",
+         "motherduck": "MotherDuck", "planetscale": "PlanetScale", "shieldai": "Shield AI", "ro": "Ro",
+         "jumpcloud": "JumpCloud", "lucidsoftware": "Lucid Software", "whoop": "WHOOP", "airbyte": "Airbyte",
+         "hightouch": "Hightouch", "supabase": "Supabase", "netflix": "Netflix", "palantir": "Palantir",
+         "plaid": "Plaid", "kraken": "Kraken", "mistral": "Mistral AI", "zoox": "Zoox", "color": "Color Health",
+         "eventbrite": "Eventbrite", "quizlet": "Quizlet", "nielsen": "Nielsen", "wealthfront": "Wealthfront",
+         "arcadia": "Arcadia", "veeva": "Veeva Systems", "attentive": "Attentive", "outreach": "Outreach",
+         "notion": "Notion", "ramp": "Ramp", "linear": "Linear", "replit": "Replit", "deel": "Deel",
+         "retool": "Retool", "mercury": "Mercury", "vanta": "Vanta", "modal": "Modal", "pinecone": "Pinecone",
+         "cohere": "Cohere", "runway": "Runway", "sierra": "Sierra", "decagon": "Decagon", "confluent": "Confluent",
+         "snowflake": "Snowflake", "census": "Census", "dagster": "Dagster Labs", "prefect": "Prefect",
+         "astronomer": "Astronomer", "neon": "Neon", "render": "Render", "railway": "Railway", "clerk": "Clerk",
+         "resend": "Resend"}
+name_of = lambda slug: NAMES.get(slug, slug.capitalize())
+
 # ---------------------------------------------------------------- roles
 SENIOR = re.compile(r"\b(senior|sr\.?|staff|principal|lead|manager|director|head|vp|vice president|"
                     r"architect|distinguished|chief|president|fellow|iii|iv)\b", re.I)
@@ -94,7 +110,7 @@ SKILLS = {
     "sql-window":     (r"window functions?|\bCTEs?\b|common table expressions?|advanced SQL", I),
     "excel":          (r"\bExcel\b|[Ss]preadsheets?|Google Sheets|[Pp]ivot tables?", 0),
     "python-core":    (r"\bPython\b", 0),
-    "pandas":         (r"\bpandas\b|NumPy|data ?frames?", I),
+    "pandas":         (r"\bpandas\b|NumPy|\bdata ?frames?\b|\bPolars\b", I),
     "data-cleaning":  (r"data (cleaning|cleansing|quality|validation|integrity|wrangling|hygiene)|"
                        r"clean(ing)? (data|datasets)|messy data", I),
     "stats":          (r"statistic|A/B test|experiment(al)? design|experimentation|hypothesis test|causal inference", I),
@@ -201,7 +217,7 @@ def from_lever(slug):
         parts.append(j.get("additionalPlain") or "")
         out.append({"title": j.get("text", ""), "url": j.get("hostedUrl", ""),
                     "location": (j.get("categories") or {}).get("location", ""),
-                    "text": "\n".join(p for p in parts if p), "company": slug.capitalize()})
+                    "text": "\n".join(p for p in parts if p), "company": name_of(slug)})
     return slug, out
 
 def from_ashby(slug):
@@ -214,7 +230,7 @@ def from_ashby(slug):
             continue
         text = j.get("descriptionPlain") or html_to_text(j.get("descriptionHtml", ""))
         out.append({"title": j.get("title", ""), "url": j.get("jobUrl", ""),
-                    "location": j.get("location", ""), "text": text, "company": slug.capitalize()})
+                    "location": j.get("location", ""), "text": text, "company": name_of(slug)})
     return slug, out
 
 # ---------------------------------------------------------------- analysis
@@ -231,7 +247,7 @@ def excerpt_candidates(text, rx):
     for line in lines_of(text):
         if 35 <= len(line) <= 240 and rx.search(line):
             score = (2 if REQ_WORDS.search(line) else 0) + (1 if 50 <= len(line) <= 180 else 0)
-            yield score, line
+            yield score, line, rx.search(line).group(0)
 
 def main(out_path):
     jobs, ok_sources = [], []
@@ -277,14 +293,14 @@ def main(out_path):
             for j in hits:
                 best = max(excerpt_candidates(j["text"], rx), default=None)
                 if best:
-                    cands.append((best[0], hashlib.md5(j["url"].encode()).hexdigest(), best[1], j))
+                    cands.append((best[0], hashlib.md5(j["url"].encode()).hexdigest(), best[1], best[2], j))
             cands.sort(key=lambda c: (-c[0], c[1]))
             picked, companies = [], set()
-            for _, _, line, j in cands:
+            for _, _, line, match, j in cands:
                 if j["company"] in companies:
                     continue
                 companies.add(j["company"])
-                picked.append({"text": line, "company": j["company"], "title": j["title"], "url": j["url"]})
+                picked.append({"text": line, "match": match, "company": j["company"], "title": j["title"], "url": j["url"]})
                 if len(picked) == 3:
                     break
             skills[sid] = {"count": len(hits), "pct": round(100 * len(hits) / n) if n else 0, "excerpts": picked}
