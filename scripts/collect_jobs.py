@@ -374,6 +374,26 @@ def excerpt_candidates(text, rx):
             score = (2 if REQ_WORDS.search(line) else 0) + (1 if 50 <= len(line) <= 180 else 0)
             yield score, line, rx.search(line).group(0)
 
+def skill_stat(sample, rx):
+    """Count postings mentioning a skill and pick up to 3 excerpts from different companies."""
+    n = len(sample)
+    hits = [j for j in sample if rx.search(j["text"])]
+    cands = []
+    for j in hits:
+        best = max(excerpt_candidates(j["text"], rx), default=None)
+        if best:
+            cands.append((best[0], hashlib.md5(j["url"].encode()).hexdigest(), best[1], best[2], j))
+    cands.sort(key=lambda c: (-c[0], c[1]))
+    picked, companies = [], set()
+    for _, _, line, match, j in cands:
+        if j["company"] in companies:
+            continue
+        companies.add(j["company"])
+        picked.append({"text": line, "match": match, "company": j["company"], "title": j["title"], "url": j["url"]})
+        if len(picked) == 3:
+            break
+    return {"count": len(hits), "pct": round(100 * len(hits) / n) if n else 0, "excerpts": picked}
+
 def main(out_path):
     jobs, ok_sources = [], []
     tasks = [(from_greenhouse, s, "Greenhouse") for s in dict.fromkeys(GREENHOUSE)] + \
@@ -415,27 +435,8 @@ def main(out_path):
         sample = [j for j in matched if j["level"]]
         matched_any.update(id(j) for j in sample)
         n = len(sample)
-        skills, extras = {}, {}
-        for sid, rx in SKILL_RX.items():
-            hits = [j for j in sample if rx.search(j["text"])]
-            cands = []
-            for j in hits:
-                best = max(excerpt_candidates(j["text"], rx), default=None)
-                if best:
-                    cands.append((best[0], hashlib.md5(j["url"].encode()).hexdigest(), best[1], best[2], j))
-            cands.sort(key=lambda c: (-c[0], c[1]))
-            picked, companies = [], set()
-            for _, _, line, match, j in cands:
-                if j["company"] in companies:
-                    continue
-                companies.add(j["company"])
-                picked.append({"text": line, "match": match, "company": j["company"], "title": j["title"], "url": j["url"]})
-                if len(picked) == 3:
-                    break
-            skills[sid] = {"count": len(hits), "pct": round(100 * len(hits) / n) if n else 0, "excerpts": picked}
-        for name, rx in EXTRA_RX.items():
-            c = sum(1 for j in sample if rx.search(j["text"]))
-            extras[name] = {"count": c, "pct": round(100 * c / n) if n else 0}
+        skills = {sid: skill_stat(sample, rx) for sid, rx in SKILL_RX.items()}
+        extras = {name: skill_stat(sample, rx) for name, rx in EXTRA_RX.items()}
         roles_out[rid] = {
             "n": n, "nInterns": sum(j["level"] == "intern" for j in sample),
             "nJunior": sum(j["level"] == "junior" for j in sample), "nAllLevels": len(matched),
