@@ -1369,7 +1369,7 @@ window.SKILLS = {
 
 window.ROLES = [
   {
-    id: "junior-data-analyst", title: "Junior Data Analyst", level: "Entry level",
+    id: "junior-data-analyst", title: "Junior Data Analyst", level: "Intern / entry level",
     aliases: ["Data Analyst", "Product Analyst", "Analytics Analyst", "Entry Level Data Analyst"],
     keywords: ["data", "analyst", "analytics", "sql", "excel", "junior", "reporting"],
     summary: "Turn raw data into answers for business teams using SQL, spreadsheets and Python.",
@@ -1381,7 +1381,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "junior-python-developer", title: "Junior Python Developer", level: "Entry level",
+    id: "junior-python-developer", title: "Junior Python Developer", level: "Intern / entry level",
     aliases: ["Python Developer", "Python Engineer", "Python Programmer"],
     keywords: ["python", "developer", "software", "engineer", "junior", "programmer", "coding"],
     summary: "Build and maintain Python services, scripts and integrations on a software team.",
@@ -1393,7 +1393,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "data-engineer", title: "Data Engineer", level: "Entry–mid level",
+    id: "data-engineer", title: "Data Engineer", level: "Intern / entry level",
     aliases: ["Junior Data Engineer", "Big Data Engineer", "ETL Developer", "Data Platform Engineer"],
     keywords: ["data", "engineer", "etl", "pipeline", "spark", "airflow", "warehouse", "big data"],
     summary: "Build the pipelines and warehouses that every analyst and model depends on.",
@@ -1405,7 +1405,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "bi-analyst", title: "Business Intelligence Analyst", level: "Entry level",
+    id: "bi-analyst", title: "Business Intelligence Analyst", level: "Intern / entry level",
     aliases: ["BI Analyst", "Business Intelligence Developer", "Power BI Developer", "Tableau Developer", "Reporting Analyst"],
     keywords: ["business", "intelligence", "bi", "analyst", "power bi", "tableau", "dashboard", "reporting", "data"],
     summary: "Design dashboards and data models that help leaders make decisions.",
@@ -1417,7 +1417,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "ml-engineer", title: "Machine Learning Engineer", level: "Entry–mid level",
+    id: "ml-engineer", title: "Machine Learning Engineer", level: "Intern / entry level",
     aliases: ["ML Engineer", "MLOps Engineer", "Machine Learning Developer"],
     keywords: ["ml", "machine learning", "engineer", "ai", "deep learning", "pytorch", "mlops", "model"],
     summary: "Train, ship and maintain machine learning models in production systems.",
@@ -1429,7 +1429,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "data-scientist", title: "Junior Data Scientist", level: "Entry level",
+    id: "data-scientist", title: "Junior Data Scientist", level: "Intern / entry level",
     aliases: ["Data Scientist", "Entry Level Data Scientist", "Applied Scientist"],
     keywords: ["data", "scientist", "science", "ml", "machine learning", "statistics", "python", "junior"],
     summary: "Use statistics and machine learning to answer open-ended business questions.",
@@ -1441,7 +1441,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "backend-developer", title: "Backend Developer (Python)", level: "Entry–mid level",
+    id: "backend-developer", title: "Backend Developer (Python)", level: "Intern / entry level",
     aliases: ["Backend Engineer", "Back-End Developer", "Python Backend Engineer", "Django Developer", "API Developer"],
     keywords: ["backend", "back-end", "developer", "api", "python", "server", "software", "engineer", "web"],
     summary: "Design APIs, databases and services that power web and mobile apps.",
@@ -1453,7 +1453,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "analytics-engineer", title: "Analytics Engineer", level: "Entry–mid level",
+    id: "analytics-engineer", title: "Analytics Engineer", level: "Intern / entry level",
     aliases: ["dbt Developer", "Analytics Engineering"],
     keywords: ["analytics", "engineer", "dbt", "sql", "data", "modeling", "warehouse"],
     summary: "Bridge analysis and engineering by building tested, documented data models.",
@@ -1465,7 +1465,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "software-engineer", title: "Software Engineer", level: "Entry level",
+    id: "software-engineer", title: "Software Engineer", level: "Intern / entry level",
     aliases: ["New Grad Software Engineer", "Junior Software Engineer", "Software Developer", "SWE", "Junior Developer", "Programmer"],
     keywords: ["software", "engineer", "developer", "swe", "new grad", "junior", "programmer", "coding", "entry"],
     summary: "Design, build and ship software on a product team, with strong CS fundamentals.",
@@ -1477,7 +1477,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "frontend-developer", title: "Frontend Developer", level: "Entry–mid level",
+    id: "frontend-developer", title: "Frontend Developer", level: "Intern / entry level",
     aliases: ["Front-End Engineer", "Frontend Engineer", "UI Engineer", "React Developer", "Web Developer", "JavaScript Developer"],
     keywords: ["frontend", "front-end", "front", "ui", "web", "react", "javascript", "typescript", "css", "developer", "engineer"],
     summary: "Build fast, accessible user interfaces for the web.",
@@ -1489,7 +1489,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "fullstack-developer", title: "Full-Stack Developer", level: "Entry–mid level",
+    id: "fullstack-developer", title: "Full-Stack Developer", level: "Intern / entry level",
     aliases: ["Full Stack Engineer", "Fullstack Engineer", "Full-Stack Web Developer"],
     keywords: ["full", "stack", "fullstack", "full-stack", "web", "developer", "engineer", "react", "node", "javascript"],
     summary: "Own features end to end, from the database and API to the user interface.",
@@ -1501,7 +1501,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "mobile-developer", title: "Mobile Developer (iOS / Android)", level: "Entry–mid level",
+    id: "mobile-developer", title: "Mobile Developer (iOS / Android)", level: "Intern / entry level",
     aliases: ["iOS Developer", "iOS Engineer", "Android Developer", "Android Engineer", "Mobile Engineer", "Swift Developer", "Kotlin Developer"],
     keywords: ["mobile", "ios", "android", "swift", "kotlin", "app", "developer", "engineer", "flutter", "react native"],
     summary: "Build native apps for iPhone and Android that are fast, reliable and accessible.",
@@ -1513,7 +1513,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "devops-engineer", title: "DevOps Engineer", level: "Entry–mid level",
+    id: "devops-engineer", title: "DevOps Engineer", level: "Intern / entry level",
     aliases: ["Platform Engineer", "Infrastructure Engineer", "Build & Release Engineer", "DevSecOps Engineer"],
     keywords: ["devops", "platform", "infrastructure", "ci", "cd", "kubernetes", "terraform", "docker", "engineer", "ops"],
     summary: "Automate how software is built, deployed and run in production.",
@@ -1525,7 +1525,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "sre", title: "Site Reliability Engineer", level: "Entry–mid level",
+    id: "sre", title: "Site Reliability Engineer", level: "Intern / entry level",
     aliases: ["SRE", "Production Engineer", "Reliability Engineer"],
     keywords: ["sre", "site", "reliability", "production", "on-call", "infrastructure", "operations", "engineer", "ops"],
     summary: "Keep large systems fast and available, and automate away operational toil.",
@@ -1537,7 +1537,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "cloud-engineer", title: "Cloud Engineer", level: "Entry–mid level",
+    id: "cloud-engineer", title: "Cloud Engineer", level: "Intern / entry level",
     aliases: ["AWS Engineer", "Azure Engineer", "GCP Engineer", "Cloud Infrastructure Engineer", "Cloud Developer"],
     keywords: ["cloud", "aws", "azure", "gcp", "infrastructure", "terraform", "engineer", "architect"],
     summary: "Design and run infrastructure on AWS, Azure or Google Cloud.",
@@ -1549,7 +1549,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "security-engineer", title: "Security Engineer", level: "Entry–mid level",
+    id: "security-engineer", title: "Security Engineer", level: "Intern / entry level",
     aliases: ["Cybersecurity Analyst", "Application Security Engineer", "SOC Analyst", "Detection Engineer", "Information Security Engineer", "Cyber Security Engineer"],
     keywords: ["security", "cyber", "cybersecurity", "appsec", "infosec", "soc", "detection", "analyst", "engineer", "pentest"],
     summary: "Find and fix vulnerabilities, detect attacks and help teams build securely.",
@@ -1561,7 +1561,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "qa-engineer", title: "QA / Test Automation Engineer", level: "Entry–mid level",
+    id: "qa-engineer", title: "QA / Test Automation Engineer", level: "Intern / entry level",
     aliases: ["SDET", "QA Engineer", "Quality Assurance Engineer", "Test Engineer", "Automation Engineer", "Software Engineer in Test"],
     keywords: ["qa", "quality", "assurance", "test", "testing", "automation", "sdet", "selenium", "playwright", "engineer"],
     summary: "Build automated test suites that let teams ship quickly without breaking things.",
@@ -1573,7 +1573,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "embedded-engineer", title: "Embedded Software Engineer", level: "Entry–mid level",
+    id: "embedded-engineer", title: "Embedded Software Engineer", level: "Intern / entry level",
     aliases: ["Firmware Engineer", "Embedded Developer", "Embedded Systems Engineer", "IoT Engineer"],
     keywords: ["embedded", "firmware", "c", "c++", "microcontroller", "rtos", "hardware", "iot", "engineer"],
     summary: "Write the software that runs on hardware, from microcontrollers to robots and cars.",
@@ -1585,7 +1585,7 @@ window.ROLES = [
     ]
   },
   {
-    id: "ai-engineer", title: "AI Engineer (LLM Applications)", level: "Entry–mid level",
+    id: "ai-engineer", title: "AI Engineer (LLM Applications)", level: "Intern / entry level",
     aliases: ["AI Engineer", "LLM Engineer", "Generative AI Engineer", "GenAI Developer", "Applied AI Engineer", "Prompt Engineer"],
     keywords: ["ai", "llm", "genai", "generative", "gpt", "rag", "agents", "prompt", "applied", "engineer", "developer"],
     summary: "Build products on top of large language models: retrieval, agents and evaluation.",

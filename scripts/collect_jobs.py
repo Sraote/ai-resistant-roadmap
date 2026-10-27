@@ -62,6 +62,42 @@ name_of = lambda slug: NAMES.get(slug, slug.capitalize())
 # ---------------------------------------------------------------- roles
 SENIOR = re.compile(r"\b(senior|sr\.?|staff|principal|lead|manager|director|head|vp|vice president|"
                     r"architect|distinguished|chief|president|fellow|iii|iv)\b", re.I)
+# ---------------------------------------------------------------- seniority
+# Only intern and junior postings are kept. A posting qualifies if its title says
+# so explicitly, or if its title is level-neutral and the description asks for at
+# most JUNIOR_MAX_YEARS of experience.
+INTERN_TITLE = re.compile(r"\bintern(ship)?s?\b|\bco-?op\b|\bapprentice(ship)?\b|\bsummer (analyst|associate|engineer)", re.I)
+JUNIOR_TITLE = re.compile(r"\bjunior\b|\bjr\.?\b|\bnew grad(uate)?s?\b|\bentry[- ]level\b|\bearly[- ]career\b|"
+                          r"\bgraduate\b|\buniversity (grad|hire|graduate)|\bcampus\b|\bassociate\b|\bresiden(t|cy)\b|"
+                          r"\blevel (1|i)\b", re.I)
+JUNIOR_LEVEL_I = re.compile(r"\b(?i:engineer|developer|analyst|scientist|programmer|specialist|administrator|tester)\s*(I|1)\b(?![IV\d])")
+MID_TITLE = re.compile(r"\b(II|III|IV|V)\b|\b(?i:engineer|developer|analyst|scientist)\s*[2-5]\b|\b(?i:mid[- ]?(level|senior))\b|"
+                       r"\b(?i:intermediate|experienced)\b|\bL[4-9]\b|\bE[4-9]\b")
+YEARS = re.compile(r"(\d{1,2})\s*(?:\+|plus)?\s*(?:(?:-|–|—|to)\s*\d{1,2}\s*\+?\s*)?years?(?:['’]s?)?(?:\s+of)?"
+                   r"(?:\s+[\w/&-]+){0,5}?\s+(?:experience|exp\b)", re.I)
+ENTRY_PHRASES = re.compile(r"new grad|recent(ly)? graduat|entry[- ]level|early[- ]career|no (prior |previous )?experience (is )?required|"
+                           r"0\s*(?:-|–|to)\s*[12]\s*years", re.I)
+JUNIOR_MAX_YEARS = 2
+
+def level_of(job):
+    """Return 'intern', 'junior' or None (mid/senior/unknown)."""
+    title, text = job["title"], job["text"]
+    if SENIOR.search(title):
+        return None
+    if INTERN_TITLE.search(title):
+        return "intern"
+    if JUNIOR_TITLE.search(title) or JUNIOR_LEVEL_I.search(title):
+        return "junior"
+    if MID_TITLE.search(title):
+        return None
+    years = [int(m.group(1)) for m in YEARS.finditer(text) if int(m.group(1)) <= 15]
+    required = max(years) if years else None
+    if required is not None and required <= JUNIOR_MAX_YEARS:
+        return "junior"
+    if required is None and ENTRY_PHRASES.search(text):
+        return "junior"
+    return None
+
 NOT_PY_SWE = re.compile(r"front[- ]?end|ios|android|mobile|embedded|firmware|hardware|data |machine learning|"
                         r"\bml\b|\bai\b|security|site reliability|\bsre\b|qa\b|test|support|sales|solutions", re.I)
 
@@ -364,15 +400,19 @@ def main(out_path):
             seen.add(key)
             uniq.append(j)
     print(f"{len(uniq)} unique postings with descriptions")
+    for j in uniq:
+        j["level"] = level_of(j)
+    entry = [j for j in uniq if j["level"]]
+    print(f"{len(entry)} intern/junior postings ({sum(j['level'] == 'intern' for j in entry)} internships)")
+    matched_any = set()
 
     roles_out = {}
     for rid, spec in ROLES.items():
         matched = [j for j in uniq if spec["title"].search(j["title"])
                    and not (spec.get("exclude") and spec["exclude"].search(j["title"]))
                    and not (spec.get("requires") and not spec["requires"].search(j["text"]))]
-        junior = [j for j in matched if not SENIOR.search(j["title"])]
-        # Prefer non-senior postings; fall back to all levels if the sample is too thin.
-        sample, includes_senior = (junior, False) if len(junior) >= 25 else (matched, True)
+        sample = [j for j in matched if j["level"]]
+        matched_any.update(id(j) for j in sample)
         n = len(sample)
         skills, extras = {}, {}
         for sid, rx in SKILL_RX.items():
@@ -396,15 +436,18 @@ def main(out_path):
             c = sum(1 for j in sample if rx.search(j["text"]))
             extras[name] = {"count": c, "pct": round(100 * c / n) if n else 0}
         roles_out[rid] = {
-            "n": n, "nAllLevels": len(matched), "nNonSenior": len(junior), "includesSenior": includes_senior,
+            "n": n, "nInterns": sum(j["level"] == "intern" for j in sample),
+            "nJunior": sum(j["level"] == "junior" for j in sample), "nAllLevels": len(matched),
             "companies": len({j["company"] for j in sample}),
             "skills": skills, "extras": extras,
         }
-        print(f"  {rid:26s} n={n:4d} (non-senior {len(junior)}, all levels {len(matched)})")
+        print(f"  {rid:26s} n={n:4d} (interns {roles_out[rid]['nInterns']}, junior {roles_out[rid]['nJunior']}, all levels {len(matched)})")
 
     data = {
         "collectedAt": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d"),
         "totalPostings": len(uniq),
+        "entryPostings": len(matched_any),
+        "juniorMaxYears": JUNIOR_MAX_YEARS,
         "boards": sorted(ok_sources, key=lambda s: -s["jobs"]),
         "roles": roles_out,
     }

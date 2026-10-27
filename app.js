@@ -155,7 +155,7 @@
       active = -1;
       list.innerHTML = results.map((r, i) => {
         const rd = roleData(r.role.id);
-        const sub = [r.text !== r.role.title ? `Matches “${esc(r.text)}”` : '', rd ? `${rd.n.toLocaleString()} live postings` : ''].filter(Boolean).join(' · ');
+        const sub = [r.text !== r.role.title ? `Matches “${esc(r.text)}”` : '', rd ? `${rd.n.toLocaleString()} intern &amp; junior postings` : ''].filter(Boolean).join(' · ');
         return `<li role="option" id="${list.id}-${i}" data-i="${i}" aria-selected="false"
             class="cursor-pointer px-4 py-2.5 flex items-center justify-between gap-3 text-left aria-selected:bg-indigo-50 dark:aria-selected:bg-indigo-500/15 hover:bg-slate-50 dark:hover:bg-slate-800/70">
             <span class="min-w-0"><span class="block truncate text-slate-900 dark:text-slate-100">${markPrefix(r.role.title, q.trim())}</span>
@@ -268,21 +268,9 @@
             ${popular.map((p) => `<a href="#/roles?q=${encodeURIComponent(p)}" class="px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition">${esc(p)}</a>`).join('')}
           </div>
           ${JOB ? `<p class="mt-8 text-xs text-slate-500">
-            Based on ${JOB.totalPostings.toLocaleString()} current job postings from ${nCompanies()} companies · updated ${fmtDate(JOB.collectedAt)} ·
+            Based on ${(JOB.entryPostings || 0).toLocaleString()} current intern &amp; junior postings from ${nCompanies()} companies · updated ${fmtDate(JOB.collectedAt)} ·
             <a href="#/about" class="underline underline-offset-2 hover:text-indigo-600 dark:hover:text-indigo-300">How this works</a></p>` : ''}
         </div>
-      </section>
-      <section class="mx-auto max-w-5xl px-4 pb-20 grid sm:grid-cols-3 gap-4">
-        ${[
-          ['1', 'Real requirements', 'How often each skill appears in current job postings for the role, with quoted excerpts linked to the source.'],
-          ['2', 'The AI Trap', 'Where students typically fake a skill with ChatGPT or Copilot — and the warning signs.'],
-          ['3', 'Verification', 'A concrete off-AI drill with pass criteria. Check them off as you prove mastery.']
-        ].map(([n, t, d]) => `
-          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
-            <div class="text-xs font-mono text-indigo-600 dark:text-indigo-400">0${n}</div>
-            <div class="mt-1 font-semibold">${t}</div>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">${d}</p>
-          </div>`).join('')}
       </section>`;
     attachAutocomplete(document.getElementById('searchForm'), { onSubmit: goRoles, onPick: goRole });
     if (window.matchMedia('(pointer: fine)').matches) document.getElementById('q').focus();
@@ -335,7 +323,7 @@
           ${best ? '<span class="text-[11px] font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">Best match</span>' : ''}
         </div>
         <div class="mt-2 text-lg font-semibold leading-snug">${esc(r.title)}</div>
-        <div class="text-xs text-slate-500 mt-0.5">${esc(r.level)}${rd ? ` · ${rd.n.toLocaleString()} live postings` : ''}</div>
+        <div class="text-xs text-slate-500 mt-0.5">${esc(r.level)}${rd ? ` · ${rd.n.toLocaleString()} intern &amp; junior postings` : ''}</div>
         <p class="mt-3 text-sm text-slate-600 dark:text-slate-400">${esc(r.summary)}</p>
         <div class="mt-4 flex flex-wrap gap-1.5">
           ${ids.slice(0, 3).map((id) => `<span class="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${esc(SKILLS[id].title)}</span>`).join('')}
@@ -390,7 +378,7 @@
         <td class="py-2 pr-4">${esc(r.title)}</td>
         <td class="py-2 pr-4 tabular-nums">${rd ? rd.n.toLocaleString() : '—'}</td>
         <td class="py-2 pr-4 tabular-nums">${rd ? rd.companies : '—'}</td>
-        <td class="py-2 text-slate-500">${rd ? (rd.includesSenior ? 'All levels' : 'Senior+ excluded') : ''}</td></tr>`;
+        <td class="py-2 text-slate-500 tabular-nums">${rd && rd.nInterns != null ? `${rd.nInterns} / ${rd.nJunior}` : ''}</td></tr>`;
     }).join('');
     app.innerHTML = `
       <article class="mx-auto max-w-3xl px-4 py-10 sm:py-14 fade-in">
@@ -400,14 +388,15 @@
 
         <h2 class="${h2}">Where the posting data comes from</h2>
         <p class="${p}">Every week a GitHub Action downloads all open postings from the public job-board APIs that companies use to power their own careers pages (Greenhouse, Lever and Ashby). ${JOB
-          ? `The latest run (${fmtDate(JOB.collectedAt)}) collected <strong class="text-slate-900 dark:text-white">${JOB.totalPostings.toLocaleString()}</strong> unique postings from <strong class="text-slate-900 dark:text-white">${nCompanies()}</strong> companies.`
+          ? `The latest run (${fmtDate(JOB.collectedAt)}) scanned <strong class="text-slate-900 dark:text-white">${JOB.totalPostings.toLocaleString()}</strong> unique postings from <strong class="text-slate-900 dark:text-white">${nCompanies()}</strong> companies and kept the <strong class="text-slate-900 dark:text-white">${(JOB.entryPostings || 0).toLocaleString()}</strong> intern and junior postings that match a role here.`
           : 'Posting data has not been collected yet.'}
           Duplicate listings of the same job in several locations are counted once.</p>
 
         <h2 class="${h2}">How postings map to roles</h2>
-        <p class="${p}">A posting counts toward a role when its job title matches that role, for example “Data Analyst”, “Product Analyst” or “Analytics Analyst” for Junior Data Analyst. The Python developer and Python backend roles also require Python to appear in the description. Titles containing Senior, Staff, Principal, Lead, Manager, Director or similar are excluded, so the numbers reflect entry and mid-level roles. When fewer than 25 non-senior postings match, all levels are included and the page says so.</p>
+        <p class="${p}">A posting counts toward a role when its job title matches that role, for example “Data Analyst”, “Product Analyst” or “Analytics Analyst” for Junior Data Analyst. The Python developer and Python backend roles also require Python to appear in the description.</p>
+        <p class="${p}">Only internships and junior roles are kept. A posting qualifies if its title says Intern, Co-op, Junior, New Grad, Entry Level, Associate or “Engineer I”, or if its title has no level and the description asks for at most ${JOB ? JOB.juniorMaxYears : 2} years of experience (or mentions new or recent graduates). Senior, Staff, Lead, Manager and level II+ titles are always excluded, as are level-neutral postings that ask for more experience or don't say.</p>
         <div class="mt-4 overflow-x-auto"><table class="w-full text-sm">
-          <thead><tr class="text-left text-xs text-slate-500"><th class="pb-2 pr-4 font-medium">Role</th><th class="pb-2 pr-4 font-medium">Postings</th><th class="pb-2 pr-4 font-medium">Companies</th><th class="pb-2 font-medium">Levels</th></tr></thead>
+          <thead><tr class="text-left text-xs text-slate-500"><th class="pb-2 pr-4 font-medium">Role</th><th class="pb-2 pr-4 font-medium">Intern &amp; junior postings</th><th class="pb-2 pr-4 font-medium">Companies</th><th class="pb-2 font-medium">Internships / junior</th></tr></thead>
           <tbody>${roleRows}</tbody></table></div>
 
         <h2 class="${h2}">How skills are counted</h2>
@@ -491,8 +480,8 @@
 
   function sampleNote(rd) {
     if (!rd) return '';
-    const parts = [`${rd.n.toLocaleString()} postings from ${rd.companies} companies`, `collected ${fmtDate(JOB.collectedAt)}`];
-    parts.push(rd.includesSenior ? 'includes senior titles (too few junior postings)' : 'senior, staff and manager titles excluded');
+    const parts = [`${rd.n.toLocaleString()} intern &amp; junior postings from ${rd.companies} companies`, `collected ${fmtDate(JOB.collectedAt)}`];
+    if (rd.nInterns != null) parts.splice(1, 0, `${rd.nInterns} internships, ${rd.nJunior} junior roles`);
     return parts.join(' · ');
   }
 
@@ -523,7 +512,7 @@
             <span class="flex items-center gap-1.5"><span class="w-3 h-2 rounded-sm bg-slate-300 dark:bg-slate-600"></span>Not on roadmap</span>
           </div>
         </div>
-        ${rd.n < 30 ? `<p class="mt-4 text-sm rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200 px-3 py-2">Small sample: only ${rd.n} matching postings this week, so treat these percentages as rough.</p>` : ''}
+        ${rd.n < 30 ? `<p class="mt-4 text-sm rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200 px-3 py-2">Small sample: only ${rd.n} intern and junior postings this week, so treat these percentages as rough.</p>` : ''}
         <ol class="mt-6 grid gap-x-10 gap-y-2.5 md:grid-cols-2 md:grid-flow-col ${rowCls}">
           ${rows.map((r) => `
             <li class="grid grid-cols-[minmax(0,10rem)_1fr_3rem] sm:grid-cols-[minmax(0,13rem)_1fr_3rem] items-center gap-3 text-sm">
@@ -590,7 +579,7 @@
     const rd = roleData(current.role.id);
     const stats = document.getElementById('stats');
     if (stats) stats.innerHTML = [
-      ['Live postings analyzed', rd ? rd.n.toLocaleString() : '—', ''],
+      ['Intern & junior postings', rd ? rd.n.toLocaleString() : '0', ''],
       ['High AI-risk skills', `${high}<span class="text-sm text-slate-400">/${ids.length}</span>`, 'text-rose-600 dark:text-rose-400'],
       ['Verified', `${pct}%`, 'text-emerald-600 dark:text-emerald-400']
     ].map(([l, v, c], i) => `
@@ -710,7 +699,7 @@
           ${stat ? `
             <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
               Mentioned in <span class="font-semibold text-slate-900 dark:text-white">${stat.count.toLocaleString()} of ${rd.n.toLocaleString()}</span>
-              ${esc(current.role.title)} postings (${stat.pct}%)${rd.includesSenior ? ', all seniority levels' : ''}.
+              intern and junior ${esc(current.role.title)} postings (${stat.pct}%).
             </p>
             ${stat.excerpts.length ? `
               <div class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">From real postings</div>

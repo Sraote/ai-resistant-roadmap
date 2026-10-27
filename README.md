@@ -24,7 +24,7 @@ Plain HTML, vanilla JavaScript and Tailwind CSS. No backend.
 
 ## Data
 
-- **Job postings (real):** `scripts/collect_jobs.py` pulls every open posting from the public Greenhouse, Lever and Ashby job boards of ~180 tech companies, matches postings to roles by title (senior titles excluded), and counts skill mentions with a keyword taxonomy. It writes `jobs-data.js`. The `refresh-data.yml` workflow runs it every Monday, commits the result and redeploys.
+- **Job postings (real):** `scripts/collect_jobs.py` pulls every open posting from the public Greenhouse, Lever and Ashby job boards of ~180 tech companies, matches postings to roles by title, keeps only internships and junior roles (junior title, or a level-neutral title asking for ≤ 2 years of experience), and counts skill mentions with a keyword taxonomy. It writes `jobs-data.js`. The `refresh-data.yml` workflow runs it every Monday, commits the result and redeploys.
 - **Learning content (editorial):** roadmaps, AI-trap write-ups, verification challenges and the AI-trap risk rubric live in `data.js` and are hand-written. Risk = sum of three 1–3 scores (AI fluency, silent failure, live-tested): 8–9 high, 6–7 medium, 3–5 low.
 
 See the site's Methodology page for details and limitations.
