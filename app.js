@@ -55,6 +55,19 @@
   // Percentages are only shown when a role has enough postings to make them meaningful.
   const MIN_SAMPLE = (JOB && JOB.minSample) || 10;
   const enough = (rd) => !!rd && rd.n >= MIN_SAMPLE;
+  const EXTRA = window.EXTRA_SKILLS || {};
+  const rolesWithSkill = (id, exceptId) => ROLES.filter((r) => r.id !== exceptId && r.stages.some((st) => st.skills.includes(id)));
+  // Skills that this role's postings mention but that aren't on its roadmap, most-requested first.
+  function offRoadmap(role, rd) {
+    if (!rd) return [];
+    const inMap = new Set(role.stages.flatMap((s) => s.skills));
+    return Object.entries(rd.skills).filter(([id, v]) => !inMap.has(id) && v.count > 0)
+      .map(([id, v]) => ({ kind: 'skill', key: id, name: SKILLS[id].title, category: SKILLS[id].category, about: SKILLS[id].reqs[0], count: v.count, pct: v.pct, roles: rolesWithSkill(id, role.id) }))
+      .concat(Object.entries(rd.extras || {}).filter(([, v]) => v.count > 0)
+        .map(([name, v]) => ({ kind: 'extra', key: name, name, category: (EXTRA[name] || {}).category || 'Tool', about: (EXTRA[name] || {}).about || '', count: v.count, pct: v.pct, roles: [] })))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  }
+  const linkAttr = (r) => (r.kind === 'extra' ? `data-extra-link="${esc(r.key)}"` : `data-skill-link="${r.key}"`);
 
   // ---------- theme ----------
   document.getElementById('themeToggle').addEventListener('click', () => {
@@ -405,6 +418,7 @@
 
         <h2 class="${h2}">How skills are counted</h2>
         <p class="${p}">Each skill has a list of terms that signal it. SQL Querying matches “SQL”, “PostgreSQL” or “MySQL”, for example, and Data Visualization matches “visualization”, “matplotlib” or “Plotly”. A posting counts once per skill if any term appears anywhere in the description. Percentages are the share of a role's postings that mention the skill. The quoted excerpts are short lines taken from those postings, linked to the original listing, with the matched term highlighted.</p>
+        <p class="${p}">Every role's postings are checked against every skill on the site plus common languages and tools (Java, Go, Rust, C#, Kafka, Snowflake, dbt and others), not just the skills on that role's roadmap. Anything they mention appears under “Also asked for, beyond this roadmap” on the role's page. The short descriptions and quick self-checks for those extra languages and tools are written by hand.</p>
         <p class="${p}">Keyword matching has limits. It can't tell “required” from “nice to have”, and it misses skills a posting implies without naming them. Some broad terms also overcount: “communication” and “stakeholders” appear in nearly every posting. The patterns are in <a class="underline" href="https://github.com/Sraote/ai-resistant-roadmap/blob/main/scripts/collect_jobs.py" target="_blank" rel="noopener">collect_jobs.py</a>.</p>
 
         <h2 class="${h2}">How the AI-trap risk is rated</h2>
@@ -463,6 +477,7 @@
         </div>
 
         ${demandSection(role)}
+        ${beyondSection(role)}
 
         <div class="mt-6 flex flex-wrap gap-3 justify-between text-sm">
           <a href="#/roles?q=" class="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">← Choose a different role</a>
@@ -472,6 +487,14 @@
 
     app.querySelectorAll('[data-skill]').forEach((b) => b.addEventListener('click', () => openPanel(b.dataset.skill)));
     app.querySelectorAll('[data-skill-link]').forEach((b) => b.addEventListener('click', () => openPanel(b.dataset.skillLink)));
+    app.querySelectorAll('[data-extra-link]').forEach((b) => b.addEventListener('click', () => openExtraPanel(b.dataset.extraLink)));
+    const bt = document.getElementById('beyondToggle');
+    if (bt) bt.addEventListener('click', () => {
+      const open = bt.dataset.open !== '1';
+      app.querySelectorAll('.beyond-more').forEach((el) => el.classList.toggle('hidden', !open));
+      bt.dataset.open = open ? '1' : '';
+      bt.textContent = open ? 'Show fewer' : `Show all ${bt.dataset.total}`;
+    });
     app.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('click', () => { current.filter = b.dataset.filter; applyFilter(); }));
     document.getElementById('resetProgress').addEventListener('click', () => {
       if (!confirm('Reset verification progress for every skill in this roadmap?')) return;
@@ -495,8 +518,8 @@
     if (!rd) return JOB && JOB.roles && JOB.roles[role.id] ? smallSampleSection(role, null) : '';
     if (!enough(rd)) return smallSampleSection(role, rd);
     const inMap = new Set(role.stages.flatMap((s) => s.skills));
-    const rows = Object.entries(rd.skills).map(([id, v]) => ({ name: SKILLS[id].title, pct: v.pct, count: v.count, id, inMap: inMap.has(id) }))
-      .concat(Object.entries(rd.extras).map(([name, v]) => ({ name, pct: v.pct, count: v.count, inMap: false })))
+    const rows = Object.entries(rd.skills).map(([id, v]) => ({ kind: 'skill', key: id, name: SKILLS[id].title, pct: v.pct, count: v.count, inMap: inMap.has(id) }))
+      .concat(Object.entries(rd.extras).map(([name, v]) => ({ kind: 'extra', key: name, name, pct: v.pct, count: v.count, inMap: false })))
       .filter((r) => r.count > 0)
       .sort((a, b) => b.pct - a.pct || b.count - a.count)
       .slice(0, 15);
@@ -521,16 +544,44 @@
         <ol class="mt-6 grid gap-x-10 gap-y-2.5 md:grid-cols-2 md:grid-flow-col ${rowCls}">
           ${rows.map((r) => `
             <li class="grid grid-cols-[minmax(0,10rem)_1fr_3rem] sm:grid-cols-[minmax(0,13rem)_1fr_3rem] items-center gap-3 text-sm">
-              ${r.inMap
-                ? `<button type="button" data-skill-link="${r.id}" class="text-left truncate hover:text-indigo-600 dark:hover:text-indigo-300 font-medium">${esc(r.name)}</button>`
-                : `<span class="truncate text-slate-500">${esc(r.name)}</span>`}
+              <button type="button" ${linkAttr(r)} class="text-left truncate hover:text-indigo-600 dark:hover:text-indigo-300 hover:underline underline-offset-2 ${r.inMap ? 'font-medium' : 'text-slate-500'}">${esc(r.name)}</button>
               <span class="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <span class="block h-full rounded-full ${r.inMap ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'}" style="width:${(r.pct / max) * 100}%"></span>
               </span>
               <span class="text-right tabular-nums text-slate-600 dark:text-slate-300">${r.pct}%</span>
             </li>`).join('')}
         </ol>
-        <p class="mt-5 text-xs text-slate-500">Share of postings that mention the skill or a close equivalent anywhere in the description. <a href="#/about" class="underline underline-offset-2 hover:text-indigo-600">Methodology</a></p>
+        <p class="mt-5 text-xs text-slate-500">Share of postings that mention the skill or a close equivalent anywhere in the description. Click any skill for details. <a href="#/about" class="underline underline-offset-2 hover:text-indigo-600">Methodology</a></p>
+      </section>`;
+  }
+
+  // Skills the postings ask for that this roadmap doesn't cover.
+  function beyondSection(role) {
+    const rd = roleData(role.id);
+    const items = offRoadmap(role, rd);
+    if (!items.length) return '';
+    const big = enough(rd);
+    const SHOW = 9;
+    const metric = (r) => (big ? `${r.pct}% of postings` : `${r.count} of ${plural(rd.n, 'posting')}`);
+    return `
+      <section class="mt-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-8">
+        <h2 class="text-xl font-bold tracking-tight">Also asked for, beyond this roadmap</h2>
+        <p class="mt-1 text-sm text-slate-500">${plural(items.length, 'skill')} that intern and junior ${esc(role.title)} postings mention but this roadmap doesn't cover. Open one to see what postings say about it.</p>
+        <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          ${items.map((r, i) => `
+            <button type="button" ${linkAttr(r)} class="${i >= SHOW ? 'hidden beyond-more ' : ''}group text-left rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-400 hover:shadow-md transition p-4 flex flex-col">
+              <span class="flex items-start justify-between gap-3">
+                <span class="font-semibold leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-300">${esc(r.name)}</span>
+                <span class="shrink-0 text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-200">${big ? `${r.pct}%` : `${r.count}/${rd.n}`}</span>
+              </span>
+              <span class="mt-0.5 text-[11px] text-slate-500">${esc(r.category)} · ${metric(r)}</span>
+              ${r.about ? `<span class="mt-2 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">${rich(r.about)}</span>` : ''}
+              <span class="mt-auto pt-3 text-[11px] text-slate-500">${r.roles.length
+                ? `On the ${r.roles.slice(0, 2).map((x) => esc(x.title)).join(' and ')} roadmap${r.roles.length > 1 ? 's' : ''}${r.roles.length > 2 ? ` +${r.roles.length - 2} more` : ''}`
+                : r.kind === 'extra' ? 'Overview and a quick self-check' : ''}</span>
+            </button>`).join('')}
+        </div>
+        ${items.length > SHOW ? `<button type="button" id="beyondToggle" data-total="${items.length}" class="mt-4 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Show all ${items.length}</button>` : ''}
       </section>`;
   }
 
@@ -687,6 +738,72 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawWires);
 
   // ---------- Skill panel ----------
+  const excerptsHtml = (stat) => (stat && stat.excerpts.length ? `
+    <div class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">From real postings</div>
+    <div class="mt-2 space-y-2">
+      ${stat.excerpts.map((e) => `
+        <figure class="rounded-lg border-l-4 border-indigo-300 dark:border-indigo-500/50 bg-slate-50 dark:bg-slate-800/50 px-3 py-2">
+          <blockquote class="text-sm text-slate-700 dark:text-slate-300">“${highlight(e.text, e.match)}”</blockquote>
+          <figcaption class="mt-1 text-[11px] text-slate-500 truncate">
+            <a href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-600 dark:hover:text-indigo-300 underline-offset-2 hover:underline">${esc(e.company)} — ${esc(e.title)} ↗</a>
+          </figcaption>
+        </figure>`).join('')}
+    </div>` : '');
+  const offMapNote = (elsewhere) => `
+    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+      This skill isn't on the ${esc(current.role.title)} roadmap, but some of its postings ask for it.
+      ${elsewhere.length ? `It's part of the ${elsewhere.map((r) => `<a href="#/roadmap/${r.id}" class="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">${esc(r.title)}</a>`).join(', ')} roadmap${elsewhere.length > 1 ? 's' : ''}.` : ''}
+    </div>`;
+  const statLine = (stat, rd) => `
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      Mentioned in <span class="font-semibold text-slate-900 dark:text-white">${stat.count.toLocaleString()} of ${rd.n.toLocaleString()}</span>
+      intern and junior ${esc(current.role.title)} postings${enough(rd) ? ` (${stat.pct}%)` : ' (too few this week for a reliable percentage)'}.
+    </p>`;
+
+  // Panel for languages and tools that have no roadmap content (EXTRA_SKILLS).
+  function openExtraPanel(name) {
+    const info = EXTRA[name] || {};
+    const rd = roleData(current.role.id);
+    const stat = rd && rd.extras ? rd.extras[name] : null;
+    stopTimer();
+    if (!openId) lastFocus = document.activeElement;
+    openId = 'extra:' + name;
+    panel.innerHTML = `
+      <div class="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="min-w-0">
+          <div class="md:hidden mx-auto -mt-2 mb-3 w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+          <div class="text-xs text-slate-500">Not on this roadmap · ${esc(info.category || 'Tool')}</div>
+          <h2 id="panelTitle" class="mt-0.5 text-xl font-bold tracking-tight">${esc(name)}</h2>
+          ${stat ? `<div class="mt-2"><span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${enough(rd) ? `In ${stat.pct}% of ${rd.n.toLocaleString()} postings` : `In ${stat.count} of ${plural(rd.n, 'posting')}`}</span></div>` : ''}
+        </div>
+        <button data-close class="shrink-0 w-9 h-9 grid place-items-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close panel">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto panel-scroll px-5 sm:px-6 py-5 space-y-6">
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+          ${esc(name)} isn't part of any roadmap here yet, but ${esc(current.role.title)} postings ask for it, so it's worth knowing what it is and checking yourself on it.
+        </div>
+        <section>
+          <h3 class="text-sm font-semibold">📋 What postings say</h3>
+          ${stat ? statLine(stat, rd) + excerptsHtml(stat) : '<p class="mt-2 text-sm text-slate-500">No posting data right now.</p>'}
+        </section>
+        ${info.about ? `<section>
+          <h3 class="text-sm font-semibold">What it is</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">${rich(info.about)}</p>
+        </section>` : ''}
+        ${info.check ? `<section class="rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/60 dark:bg-indigo-500/10 p-4">
+          <h3 class="text-sm font-semibold text-indigo-900 dark:text-indigo-200">🛡️ Quick independent check</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">${rich(info.check)}</p>
+          <p class="mt-3 text-[11px] text-slate-500">No ChatGPT, Copilot or autocomplete; official docs only. Full AI-trap guide not written yet for this skill.</p>
+        </section>` : ''}
+      </div>`;
+    panel.querySelector('[data-close]').addEventListener('click', () => closePanel());
+    panel.classList.remove('translate-y-full', 'md:translate-x-full');
+    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    document.body.style.overflow = 'hidden';
+    panel.querySelector('[data-close]').focus({ preventScroll: true });
+  }
   let openId = null, timer = null, timerEnd = 0, lastFocus = null;
 
   function openPanel(id) {
@@ -698,8 +815,10 @@
     const st = skillState(id);
     const r = RISK[s.risk];
     const idx = current.order.indexOf(id);
-    const prev = current.order[idx - 1], next = current.order[idx + 1];
+    const onMap = idx >= 0;
+    const prev = onMap ? current.order[idx - 1] : null, next = onMap ? current.order[idx + 1] : null;
     const stage = current.role.stages.find((x) => x.skills.includes(id));
+    const elsewhere = onMap ? [] : rolesWithSkill(id, current.role.id);
     const rd = roleData(current.role.id);
     const stat = skillStat(current.role.id, id);
     const total = s.rubric.reduce((a, b) => a + b, 0);
@@ -708,7 +827,7 @@
       <div class="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div class="min-w-0">
           <div class="md:hidden mx-auto -mt-2 mb-3 w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-          <div class="text-xs text-slate-500">${esc(stage.name)} · ${esc(s.category)}</div>
+          <div class="text-xs text-slate-500">${onMap ? esc(stage.name) : 'Not on this roadmap'} · ${esc(s.category)}</div>
           <h2 id="panelTitle" class="mt-0.5 text-xl font-bold tracking-tight">${esc(s.title)}</h2>
           <div class="mt-2 flex flex-wrap gap-2">
             <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ring-1 ${r.chip}"><span class="w-1.5 h-1.5 rounded-full ${r.dot}"></span>${r.label}</span>
@@ -721,6 +840,7 @@
       </div>
 
       <div class="flex-1 overflow-y-auto panel-scroll px-5 sm:px-6 py-5 space-y-6">
+        ${onMap ? '' : offMapNote(elsewhere)}
         <section>
           <h3 class="text-sm font-semibold flex items-center gap-2">📋 Key Technical Requirements</h3>
           ${stat ? `
@@ -796,7 +916,7 @@
         </section>
       </div>
 
-      <div class="flex items-center justify-between gap-2 px-5 sm:px-6 py-3 border-t border-slate-200 dark:border-slate-800 text-sm">
+      <div class="${onMap ? '' : 'hidden '}flex items-center justify-between gap-2 px-5 sm:px-6 py-3 border-t border-slate-200 dark:border-slate-800 text-sm">
         <button data-nav="${prev || ''}" ${prev ? '' : 'disabled'} class="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none truncate max-w-[45%]">← ${prev ? esc(SKILLS[prev].title) : ''}</button>
         <span class="text-xs text-slate-500 shrink-0">${idx + 1} / ${current.order.length}</span>
         <button data-nav="${next || ''}" ${next ? '' : 'disabled'} class="px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none truncate max-w-[45%]">${next ? esc(SKILLS[next].title) : ''} →</button>
@@ -867,6 +987,7 @@
     if (e.key === 'Escape') closePanel();
     if (e.target.tagName === 'INPUT') return;
     const idx = current.order.indexOf(openId);
+    if (idx < 0) return;
     if (e.key === 'ArrowRight' && current.order[idx + 1]) openPanel(current.order[idx + 1]);
     if (e.key === 'ArrowLeft' && current.order[idx - 1]) openPanel(current.order[idx - 1]);
   });

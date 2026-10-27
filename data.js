@@ -1597,3 +1597,73 @@ window.ROLES = [
     ]
   }
 ];
+
+// Skills that postings ask for but that aren't part of any roadmap. Names match
+// EXTRAS in scripts/collect_jobs.py. Editorial summaries, not drawn from postings.
+window.EXTRA_SKILLS = {
+  "Java": {
+    category: "Language",
+    about: "A statically typed, object-oriented language that runs on the JVM. It's the backbone of many large backend systems, Android's legacy codebase and big-data tools like Hadoop and Kafka.",
+    check: "Without an IDE's autocomplete, write a class hierarchy with an interface, a generic method and a custom exception, then explain why `equals` and `hashCode` must be overridden together."
+  },
+  "Go": {
+    category: "Language",
+    about: "A compact, compiled language from Google built for networked services and infrastructure tools. Docker, Kubernetes and Terraform are written in Go.",
+    check: "Write a worker pool that processes URLs concurrently with goroutines and channels, cancels cleanly with `context`, and passes `go test -race`."
+  },
+  "Rust": {
+    category: "Language",
+    about: "A systems language that guarantees memory safety without garbage collection through its ownership and borrowing rules. It's increasingly used for infrastructure, databases and security-sensitive code.",
+    check: "Implement a small command-line tool that parses a file into structs and returns errors with `Result`. It should have no `unwrap()` in non-test code, and you should be able to explain every borrow-checker error you hit."
+  },
+  "C# / .NET": {
+    category: "Language",
+    about: "Microsoft's main language and runtime, used for enterprise backends, Windows apps and game development with Unity.",
+    check: "Build a minimal ASP.NET Core API with dependency injection and async database calls, and explain the difference between `Task.Wait()` and `await` and why the first can deadlock."
+  },
+  "Ruby / Rails": {
+    category: "Language",
+    about: "A dynamic language and the Rails web framework, known for convention over configuration. Shopify, GitHub and many startups run on it.",
+    check: "Build a Rails resource with a model validation, an association and a request spec. Then find and fix an N+1 query using the logs alone."
+  },
+  "Scala": {
+    category: "Language",
+    about: "A functional and object-oriented language on the JVM, most common in data engineering through Apache Spark and in high-throughput backends.",
+    check: "Rewrite a loop-heavy data transformation with immutable collections and pattern matching, and explain what `map`, `flatMap` and `fold` each do to the types."
+  },
+  "GraphQL": {
+    category: "API",
+    about: "A query language for APIs that lets clients ask for exactly the fields they need from a typed schema. It's often used between frontends and backends.",
+    check: "Design a schema for posts and comments by hand, implement resolvers, then spot and fix the N+1 problem with a DataLoader."
+  },
+  "Kafka": {
+    category: "Data Engineering",
+    about: "A distributed event-streaming platform for moving high volumes of data between systems in real time, using topics, partitions and consumer groups.",
+    check: "Run Kafka locally, produce events to a topic with 3 partitions and consume them with two consumers in one group. Predict on paper which consumer gets which partition, and what happens when one dies."
+  },
+  "Snowflake": {
+    category: "Data Warehouse",
+    about: "A cloud data warehouse that separates storage from compute, widely used by analytics and data teams for SQL at scale.",
+    check: "Load a public dataset, write a query using a window function and a CTE, then read its query profile and explain which step was most expensive and why."
+  },
+  "BigQuery": {
+    category: "Data Warehouse",
+    about: "Google Cloud's serverless data warehouse. You pay by data scanned, so query design directly affects cost.",
+    check: "Query a BigQuery public dataset. Before running, estimate how much data it will scan, then reduce it with partition filters and by selecting only the columns you need."
+  },
+  "Redshift": {
+    category: "Data Warehouse",
+    about: "Amazon's columnar data warehouse on AWS. Distribution and sort keys strongly affect its performance.",
+    check: "Explain on paper how you'd choose distribution and sort keys for an orders table joined to customers, then verify your choice with `EXPLAIN`."
+  },
+  "dbt": {
+    category: "Data Engineering",
+    about: "A tool for building tested, documented SQL transformations inside a warehouse. It's the core tool of analytics engineering.",
+    check: "Build three dbt models (staging, intermediate, mart) for a small dataset, with `unique` and `not_null` tests and one custom test, and explain the DAG `dbt docs` generates."
+  },
+  "NoSQL": {
+    category: "Databases",
+    about: "Non-relational databases such as MongoDB, DynamoDB, Cassandra and Redis, designed around specific access patterns, scale or speed rather than joins.",
+    check: "Model the same app (users, posts, likes) in Postgres and in DynamoDB. For DynamoDB, design the keys from the access patterns first and explain what each query costs."
+  }
+};

@@ -14,6 +14,8 @@ An interactive tool for Computer Science and Data Science students: search a job
    - ⚠️ **The AI Trap** — how students shortcut the skill, plus warning signs
    - 🛡️ **The Independent Verification Challenge** — a timed, off-AI drill with pass criteria you check off to mark the skill verified
 
+Each roadmap page also ranks every skill the role's postings ask for and lists the ones **beyond the roadmap** (other skills on the site, plus languages and tools like Java, Go, Kafka and Snowflake), each with real excerpts and a quick self-check.
+
 19 roles across data, software, web, mobile, infrastructure, security, QA, embedded and AI.
 
 Extras: dark/light mode, filters (high AI-risk, not yet verified), a challenge timer, keyboard navigation (← → Esc), and progress saved in your browser.
@@ -33,7 +35,7 @@ See the site's Methodology page for details and limitations.
 | --- | --- |
 | `index.html` | Page shell, header, side panel |
 | `app.js` | Hash router, the four pages, roadmap wiring, panel, progress |
-| `data.js` | Roles, roadmaps, AI traps, challenges, risk rubric (editorial) |
+| `data.js` | Roles, roadmaps, AI traps, challenges, risk rubric, extra-skill summaries (editorial) |
 | `jobs-data.js` | Generated posting statistics and excerpts (do not edit) |
 | `scripts/collect_jobs.py` | Job-posting collector |
 | `input.css` / `tailwind.config.js` | Tailwind source, compiled to `styles.css` on deploy |
