@@ -252,7 +252,7 @@
               `<button data-filter="${k}" role="tab" class="px-3 py-1.5 rounded-lg font-medium transition">${l}</button>`).join('')}
           </div>
           <div class="flex items-center gap-4 text-xs text-slate-500">
-            ${['high', 'medium', 'low'].map((k) => `<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${RISK[k].dot}"></span>${RISK[k].short} AI-trap risk</span>`).join('')}
+            ${['high', 'medium', 'low'].map((k) => `<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${RISK[k].dot}"></span>${RISK[k].short}<span class="hidden sm:inline">&nbsp;AI-trap risk</span></span>`).join('')}
           </div>
         </div>
 
@@ -445,7 +445,7 @@
         <section>
           <h3 class="text-sm font-semibold flex items-center gap-2">📋 Key Technical Requirements</h3>
           <ul class="mt-3 space-y-2">
-            ${s.reqs.map((q) => `<li class="flex gap-2.5 text-sm text-slate-700 dark:text-slate-300"><svg class="w-4 h-4 mt-0.5 shrink-0 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>${esc(q)}</span></li>`).join('')}
+            ${s.reqs.map((q) => `<li class="flex gap-2.5 text-sm text-slate-700 dark:text-slate-300"><svg class="w-4 h-4 mt-0.5 shrink-0 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>${rich(q)}</span></li>`).join('')}
           </ul>
           <figure class="mt-3 rounded-lg border-l-4 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-sm">
             <blockquote class="italic text-slate-600 dark:text-slate-400">“${esc(s.jd)}”</blockquote>
@@ -455,10 +455,10 @@
 
         <section class="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-4">
           <h3 class="text-sm font-semibold text-amber-900 dark:text-amber-200">⚠️ The AI Trap</h3>
-          <p class="mt-2 text-sm text-amber-900/90 dark:text-amber-100/90 leading-relaxed">${esc(s.trap)}</p>
+          <p class="mt-2 text-sm text-amber-900/90 dark:text-amber-100/90 leading-relaxed">${rich(s.trap)}</p>
           <div class="mt-3 text-xs font-semibold uppercase tracking-wide text-amber-800/80 dark:text-amber-300/80">You might be in the trap if…</div>
           <ul class="mt-1.5 space-y-1.5">
-            ${s.flags.map((f) => `<li class="flex gap-2 text-sm text-amber-900/90 dark:text-amber-100/90"><span aria-hidden="true">🚩</span><span>${esc(f)}</span></li>`).join('')}
+            ${s.flags.map((f) => `<li class="flex gap-2 text-sm text-amber-900/90 dark:text-amber-100/90"><span aria-hidden="true">🚩</span><span>${rich(f)}</span></li>`).join('')}
           </ul>
         </section>
 
@@ -484,7 +484,7 @@
             ${s.challenge.criteria.map((c, i) => `
               <label class="flex gap-3 items-start rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2.5 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/50 has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50 dark:has-[:checked]:bg-emerald-500/10">
                 <input type="checkbox" data-crit="${i}" ${st.checks[i] ? 'checked' : ''} class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0" />
-                <span class="text-sm">${esc(c)}</span>
+                <span class="text-sm">${rich(c)}</span>
               </label>`).join('')}
           </div>
           <button id="verifyBtn" class="mt-4 w-full rounded-xl font-semibold py-2.5 transition"></button>
