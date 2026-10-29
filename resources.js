@@ -7,22 +7,22 @@ window.RESOURCES = {
   // ---------------------------------------------------------------- data & SQL
   "sql-basics": [
     { t: "SQLBolt interactive lessons", u: "https://sqlbolt.com/", by: "SQLBolt", type: "Practice" },
-    { t: "SQL Tutorial for Data Analysis", u: "https://mode.com/sql-tutorial/", by: "Mode", type: "Course" },
+    { t: "SQL Tutorial for Data Analysis", u: "https://www.thoughtspot.com/sql-tutorial", by: "ThoughtSpot (formerly Mode)", type: "Course" },
     { t: "Select Star SQL", u: "https://selectstarsql.com/", by: "Zi Chong Kao", type: "Book" },
-    { t: "SQLZoo exercises", u: "https://sqlzoo.net/", by: "SQLZoo", type: "Practice" }
+    { t: "SQLZoo exercises", u: "https://sqlzoo.net/wiki/SQL_Tutorial", by: "SQLZoo", type: "Practice" }
   ],
   "sql-joins": [
     { t: "Joins and subqueries exercises", u: "https://pgexercises.com/questions/joins/", by: "PostgreSQL Exercises", type: "Practice" },
-    { t: "SQL joins lessons", u: "https://mode.com/sql-tutorial/sql-joins/", by: "Mode", type: "Course" },
+    { t: "SQL joins lessons", u: "https://www.thoughtspot.com/sql-tutorial/sql-joins", by: "ThoughtSpot (formerly Mode)", type: "Course" },
     { t: "Joins between tables", u: "https://www.postgresql.org/docs/current/tutorial-join.html", by: "PostgreSQL docs", type: "Docs" }
   ],
   "sql-window": [
     { t: "Window functions tutorial", u: "https://www.postgresql.org/docs/current/tutorial-window.html", by: "PostgreSQL docs", type: "Docs" },
-    { t: "SQL window functions", u: "https://mode.com/sql-tutorial/sql-window-functions/", by: "Mode", type: "Course" },
+    { t: "SQL window functions", u: "https://www.thoughtspot.com/sql-tutorial/sql-window-functions", by: "ThoughtSpot (formerly Mode)", type: "Course" },
     { t: "Aggregation and window exercises", u: "https://pgexercises.com/questions/aggregates/", by: "PostgreSQL Exercises", type: "Practice" }
   ],
   "excel": [
-    { t: "Excel tutorials", u: "https://edu.gcfglobal.org/en/excel/", by: "GCFGlobal", type: "Course" },
+    { t: "Excel Foundations series", u: "https://www.learnfree.org/series/excel-foundations", by: "GCFGlobal LearnFree", type: "Course" },
     { t: "Excel functions reference with examples", u: "https://exceljet.net/functions", by: "Exceljet", type: "Guide" },
     { t: "Excel help & learning", u: "https://support.microsoft.com/en-us/excel", by: "Microsoft", type: "Docs" }
   ],
@@ -50,7 +50,7 @@ window.RESOURCES = {
   "bi-tools": [
     { t: "Power BI learning paths", u: "https://learn.microsoft.com/en-us/training/powerplatform/power-bi", by: "Microsoft Learn", type: "Course" },
     { t: "Free Tableau training videos", u: "https://www.tableau.com/learn/training", by: "Tableau", type: "Video", note: "Free account" },
-    { t: "Tableau Public (free tool + gallery)", u: "https://public.tableau.com/", by: "Tableau", type: "Practice" }
+    { t: "Tableau Public (free tool + gallery)", u: "https://public.tableau.com/app", by: "Tableau", type: "Practice" }
   ],
   "dax": [
     { t: "DAX Guide (every function, with examples)", u: "https://dax.guide/", by: "SQLBI", type: "Docs" },
@@ -93,7 +93,7 @@ window.RESOURCES = {
   "oop": [
     { t: "Design patterns and refactoring", u: "https://refactoring.guru/", by: "Refactoring.Guru", type: "Guide" },
     { t: "Classes (Python tutorial)", u: "https://docs.python.org/3/tutorial/classes.html", by: "Python docs", type: "Docs" },
-    { t: "Composing Programs", u: "https://www.composingprograms.com/", by: "John DeNero (UC Berkeley)", type: "Book" }
+    { t: "Composing Programs", u: "https://composingprograms.com/", by: "John DeNero (UC Berkeley)", type: "Book" }
   ],
   "dsa": [
     { t: "NeetCode roadmap (free problem list + videos)", u: "https://neetcode.io/roadmap", by: "NeetCode", type: "Practice" },
@@ -104,7 +104,7 @@ window.RESOURCES = {
   "debugging": [
     { t: "The Debugging Book", u: "https://www.debuggingbook.org/", by: "Andreas Zeller", type: "Book" },
     { t: "pdb, the Python debugger", u: "https://docs.python.org/3/library/pdb.html", by: "Python docs", type: "Docs" },
-    { t: "Debugging in VS Code", u: "https://code.visualstudio.com/docs/editor/debugging", by: "Visual Studio Code docs", type: "Docs" }
+    { t: "Debugging in VS Code", u: "https://code.visualstudio.com/docs/debugtest/debugging", by: "Visual Studio Code docs", type: "Docs" }
   ],
   "testing": [
     { t: "Get started with pytest", u: "https://docs.pytest.org/en/stable/getting-started.html", by: "pytest docs", type: "Docs" },
@@ -173,7 +173,7 @@ window.RESOURCES = {
   "cloud": [
     { t: "AWS Skill Builder (free digital courses)", u: "https://skillbuilder.aws/", by: "Amazon Web Services", type: "Course", note: "Free account" },
     { t: "Azure Fundamentals learning path", u: "https://learn.microsoft.com/en-us/training/paths/microsoft-azure-fundamentals-describe-cloud-concepts/", by: "Microsoft Learn", type: "Course" },
-    { t: "Google Cloud Skills Boost", u: "https://www.cloudskillsboost.google/", by: "Google Cloud", type: "Course", note: "Some labs need credits" },
+    { t: "Google Skills (formerly Cloud Skills Boost)", u: "https://www.skills.google/", by: "Google Cloud", type: "Course", note: "Some labs need credits" },
     { t: "IAM security best practices", u: "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html", by: "AWS docs", type: "Docs" }
   ],
   "networking": [
@@ -231,10 +231,10 @@ window.RESOURCES = {
     { t: "Analyze runtime performance in DevTools", u: "https://developer.chrome.com/docs/devtools/performance", by: "Chrome for Developers", type: "Docs" }
   ],
   "mobile-native": [
-    { t: "The Swift Programming Language", u: "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/", by: "Swift.org", type: "Book" },
+    { t: "The Swift Programming Language", u: "https://docs.swift.org/latest/documentation/the-swift-programming-language/", by: "Swift.org", type: "Book" },
     { t: "SwiftUI tutorials", u: "https://developer.apple.com/tutorials/swiftui", by: "Apple", type: "Course" },
     { t: "Android Basics with Compose", u: "https://developer.android.com/courses/android-basics-compose/course", by: "Google", type: "Course" },
-    { t: "Stanford CS193p: Developing Apps for iOS", u: "https://cs193p.sites.stanford.edu/", by: "Stanford", type: "Course" }
+    { t: "Stanford CS193p: Developing Apps for iOS", u: "https://cs193p.stanford.edu/", by: "Stanford", type: "Course" }
   ],
   "mobile-arch": [
     { t: "Guide to app architecture", u: "https://developer.android.com/topic/architecture", by: "Android Developers", type: "Docs" },
@@ -244,10 +244,10 @@ window.RESOURCES = {
 
   // ---------------------------------------------------------------- machine learning & AI
   "linear-algebra": [
-    { t: "Essence of Linear Algebra", u: "https://www.3blue1brown.com/topics/linear-algebra", by: "3Blue1Brown", type: "Video" },
+    { t: "Essence of Linear Algebra", u: "https://www.3blue1brown.com/?topic=linear-algebra", by: "3Blue1Brown", type: "Video" },
     { t: "Mathematics for Machine Learning", u: "https://mml-book.github.io/", by: "Deisenroth, Faisal & Ong", type: "Book" },
     { t: "Linear Algebra (18.06)", u: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/", by: "MIT OpenCourseWare", type: "Course" },
-    { t: "Neural networks and backpropagation", u: "https://www.3blue1brown.com/topics/neural-networks", by: "3Blue1Brown", type: "Video" }
+    { t: "Neural networks and backpropagation", u: "https://www.3blue1brown.com/?topic=neural-networks", by: "3Blue1Brown", type: "Video" }
   ],
   "sklearn": [
     { t: "Machine Learning Crash Course", u: "https://developers.google.com/machine-learning/crash-course", by: "Google", type: "Course" },
@@ -277,27 +277,27 @@ window.RESOURCES = {
   ],
   "llm-apps": [
     { t: "Prompt engineering interactive tutorial", u: "https://github.com/anthropics/prompt-eng-interactive-tutorial", by: "Anthropic", type: "Course" },
-    { t: "Prompt engineering overview", u: "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview", by: "Anthropic docs", type: "Docs" },
-    { t: "OpenAI Cookbook", u: "https://cookbook.openai.com/", by: "OpenAI", type: "Guide" },
+    { t: "Prompt engineering overview", u: "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview", by: "Anthropic docs", type: "Docs" },
+    { t: "OpenAI Cookbook", u: "https://developers.openai.com/cookbook", by: "OpenAI", type: "Guide" },
     { t: "OWASP Top 10 for LLM applications", u: "https://genai.owasp.org/", by: "OWASP", type: "Guide" }
   ],
   "rag": [
-    { t: "Introducing Contextual Retrieval", u: "https://www.anthropic.com/news/contextual-retrieval", by: "Anthropic", type: "Guide" },
+    { t: "Introducing Contextual Retrieval", u: "https://www.anthropic.com/research/contextual-retrieval", by: "Anthropic", type: "Guide" },
     { t: "Pinecone Learn (vector search and RAG)", u: "https://www.pinecone.io/learn/", by: "Pinecone", type: "Guide" },
     { t: "Hugging Face LLM course", u: "https://huggingface.co/learn/llm-course/chapter1/1", by: "Hugging Face", type: "Course" }
   ],
   "llm-evals": [
     { t: "Your AI product needs evals", u: "https://hamel.dev/blog/posts/evals/", by: "Hamel Husain", type: "Guide" },
-    { t: "Define success criteria and build evaluations", u: "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests", by: "Anthropic docs", type: "Docs" },
+    { t: "Define success criteria and build evaluations", u: "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests", by: "Anthropic docs", type: "Docs" },
     { t: "OpenAI Evals (open-source framework)", u: "https://github.com/openai/evals", by: "OpenAI", type: "Guide" }
   ],
 
   // ---------------------------------------------------------------- security
   "appsec": [
     { t: "Web Security Academy (free labs)", u: "https://portswigger.net/web-security", by: "PortSwigger", type: "Practice", note: "Free account" },
-    { t: "OWASP Top 10", u: "https://owasp.org/Top10/", by: "OWASP", type: "Guide" },
+    { t: "OWASP Top 10", u: "https://top10.owasp.org/", by: "OWASP", type: "Guide" },
     { t: "OWASP Cheat Sheet Series", u: "https://cheatsheetseries.owasp.org/", by: "OWASP", type: "Docs" },
-    { t: "OWASP Juice Shop (vulnerable practice app)", u: "https://owasp.org/www-project-juice-shop/", by: "OWASP", type: "Practice" }
+    { t: "OWASP Juice Shop (vulnerable practice app)", u: "https://owasp.org/projects/juice-shop", by: "OWASP", type: "Practice" }
   ],
   "threat-modeling": [
     { t: "Threat Modeling Cheat Sheet", u: "https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html", by: "OWASP", type: "Guide" },
@@ -364,12 +364,12 @@ window.RESOURCES = {
     { t: "Confluent Developer courses", u: "https://developer.confluent.io/courses/", by: "Confluent", type: "Course" }
   ],
   "Snowflake": [
-    { t: "Snowflake quickstarts", u: "https://quickstarts.snowflake.com/", by: "Snowflake", type: "Course", note: "Free trial account" },
-    { t: "Snowflake documentation", u: "https://docs.snowflake.com/", by: "Snowflake", type: "Docs" }
+    { t: "Snowflake developer guides (quickstarts)", u: "https://www.snowflake.com/en/developers/guides/", by: "Snowflake", type: "Course", note: "Free trial account" },
+    { t: "Snowflake documentation", u: "https://docs.snowflake.com/en/", by: "Snowflake", type: "Docs" }
   ],
   "BigQuery": [
-    { t: "BigQuery sandbox (free, no credit card)", u: "https://cloud.google.com/bigquery/docs/sandbox", by: "Google Cloud", type: "Docs" },
-    { t: "BigQuery public datasets", u: "https://cloud.google.com/bigquery/public-data", by: "Google Cloud", type: "Practice" }
+    { t: "BigQuery sandbox (free, no credit card)", u: "https://docs.cloud.google.com/bigquery/docs/sandbox", by: "Google Cloud", type: "Docs" },
+    { t: "BigQuery public datasets", u: "https://docs.cloud.google.com/bigquery/public-data", by: "Google Cloud", type: "Practice" }
   ],
   "Redshift": [
     { t: "Amazon Redshift getting started guide", u: "https://docs.aws.amazon.com/redshift/latest/gsg/new-user-serverless.html", by: "AWS docs", type: "Docs" },

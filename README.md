@@ -12,6 +12,7 @@ An interactive tool for Computer Science and Data Science students: search a job
 4. **Roadmap dashboard** — a staged flowchart of skills. Click any node for:
    - 📋 **Key Technical Requirements**: how many real postings for the role mention the skill, with quoted excerpts linked to the original listings
    - ⚠️ **The AI Trap** — how students shortcut the skill, plus warning signs
+   - 📚 **Free learning resources**: official docs, free courses, books and practice sites (links checked weekly)
    - 🛡️ **The Independent Verification Challenge** — a timed, off-AI drill with pass criteria you check off to mark the skill verified
 
 Each roadmap page also lists every skill the role's postings ask for, with the share of postings mentioning it, including ones not on the roadmap (other skills on the site, plus languages and tools like Java, Go, Kafka and Snowflake). Click any of them for real excerpts and a quick self-check.
@@ -36,6 +37,7 @@ See the site's Methodology page for details and limitations.
 | `index.html` | Page shell, header, side panel |
 | `app.js` | Hash router, the four pages, roadmap wiring, panel, progress |
 | `data.js` | Roles, roadmaps, AI traps, challenges, risk rubric, extra-skill summaries (editorial) |
+| `resources.js` | Free learning resources per skill (links checked by `check-links.yml`) |
 | `jobs-data.js` | Generated posting statistics and excerpts (do not edit) |
 | `scripts/collect_jobs.py` | Job-posting collector |
 | `input.css` / `tailwind.config.js` | Tailwind source, compiled to `styles.css` on deploy |

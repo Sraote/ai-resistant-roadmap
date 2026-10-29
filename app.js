@@ -57,6 +57,31 @@
   const enough = (rd) => !!rd && rd.n >= MIN_SAMPLE;
   const EXTRA = window.EXTRA_SKILLS || {};
   const rolesWithSkill = (id, exceptId) => ROLES.filter((r) => r.id !== exceptId && r.stages.some((st) => st.skills.includes(id)));
+  const RES = window.RESOURCES || {};
+  const RES_ICON = { Docs: '📖', Course: '🎓', Book: '📘', Practice: '🧩', Video: '▶️', Guide: '🧭' };
+  // Free learning resources for a skill id or extra-skill name.
+  const resourcesHtml = (key) => {
+    const list = RES[key] || [];
+    if (!list.length) return '';
+    return `
+      <section>
+        <h3 class="text-sm font-semibold">📚 Free learning resources</h3>
+        <p class="mt-1 text-xs text-slate-500">Work through the exercises yourself rather than pasting them into an AI tool. That's the point.</p>
+        <ul class="mt-3 space-y-2">
+          ${list.map((r) => `
+            <li>
+              <a href="${esc(safeUrl(r.u))}" target="_blank" rel="noopener noreferrer"
+                class="group flex items-start gap-3 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2.5 hover:border-indigo-400 dark:hover:border-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                <span class="shrink-0 text-base leading-5" aria-hidden="true">${RES_ICON[r.type] || '🔗'}</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block text-sm font-medium text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-300">${esc(r.t)} <span class="text-slate-400">↗</span></span>
+                  <span class="block text-[11px] text-slate-500">${esc(r.by)} · ${esc(r.type)}${r.note ? ` · <span class="text-amber-700 dark:text-amber-300">${esc(r.note)}</span>` : ''}</span>
+                </span>
+              </a>
+            </li>`).join('')}
+        </ul>
+      </section>`;
+  };
   const linkAttr = (r) => (r.kind === 'extra' ? `data-extra-link="${esc(r.key)}"` : `data-skill-link="${r.key}"`);
 
   // ---------- theme ----------
@@ -409,6 +434,8 @@
         <h2 class="${h2}">How skills are counted</h2>
         <p class="${p}">Each skill has a list of terms that signal it. SQL Querying matches “SQL”, “PostgreSQL” or “MySQL”, for example, and Data Visualization matches “visualization”, “matplotlib” or “Plotly”. A posting counts once per skill if any term appears anywhere in the description. Percentages are the share of a role's postings that mention the skill. The quoted excerpts are short lines taken from those postings, linked to the original listing, with the matched term highlighted.</p>
         <p class="${p}">Every role's postings are checked against every skill on the site plus common languages and tools (Java, Go, Rust, C#, Kafka, Snowflake, dbt and others), not just the skills on that role's roadmap. Skills that aren't on the roadmap appear in grey in the role's “What postings ask for” chart, and you can click them for details. The short descriptions and quick self-checks for those extra languages and tools are written by hand.</p>
+        <h2 class="${h2}">Learning resources</h2>
+        <p class="${p}">Each skill lists free resources chosen by hand: official documentation, free university courses, free books and practice sites. Some need a free account, and the link says so when they do. A GitHub Action checks every link each week.</p>
         <p class="${p}">Keyword matching has limits. It can't tell “required” from “nice to have”, and it misses skills a posting implies without naming them. Some broad terms also overcount: “communication” and “stakeholders” appear in nearly every posting. The patterns are in <a class="underline" href="https://github.com/Sraote/ai-resistant-roadmap/blob/main/scripts/collect_jobs.py" target="_blank" rel="noopener">collect_jobs.py</a>.</p>
 
         <h2 class="${h2}">How the AI-trap risk is rated</h2>
@@ -761,6 +788,7 @@
           <h3 class="text-sm font-semibold">What it is</h3>
           <p class="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">${rich(info.about)}</p>
         </section>` : ''}
+        ${resourcesHtml(name)}
         ${info.check ? `<section class="rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/60 dark:bg-indigo-500/10 p-4">
           <h3 class="text-sm font-semibold text-indigo-900 dark:text-indigo-200">🛡️ Quick independent check</h3>
           <p class="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">${rich(info.check)}</p>
@@ -834,6 +862,8 @@
             ${s.reqs.map((q) => `<li class="flex gap-2.5 text-sm text-slate-700 dark:text-slate-300"><svg class="w-4 h-4 mt-0.5 shrink-0 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg><span>${rich(q)}</span></li>`).join('')}
           </ul>
         </section>
+
+        ${resourcesHtml(id)}
 
         <section class="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-4">
           <h3 class="text-sm font-semibold text-amber-900 dark:text-amber-200">⚠️ The AI Trap</h3>
