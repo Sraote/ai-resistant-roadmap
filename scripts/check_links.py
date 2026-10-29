@@ -53,6 +53,11 @@ def main(path):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
             f.write(f"### Resource links\n{len(urls)} checked · **{broken} broken** · {blocked} blocked\n\n```\n"
                     + "\n".join(l for l in lines if not l.startswith("OK")) + "\n```\n")
+    if os.environ.get("GITHUB_ACTIONS"):
+        # One annotation with the full non-OK report (readable through the checks API).
+        body = "\n".join(l for l in lines if not l.startswith("OK")) or "all links OK"
+        body = body.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+        print(f"::notice title=Link report ({len(urls)} links, {broken} broken, {blocked} blocked)::{body}")
     return 1 if broken else 0
 
 if __name__ == "__main__":
