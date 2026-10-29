@@ -256,7 +256,7 @@
             Learn the skills.<br/><span class="text-indigo-600 dark:text-indigo-400">Prove them without AI.</span>
           </h1>
           <p class="mt-5 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            Search a role to see what employers actually ask for, where students usually lean on ChatGPT or Copilot instead of learning, and the off-AI challenges that prove you've got it.
+            Search for a job role to see what employers actually ask for, where students usually lean on AI tools instead of learning, and questions that prove your understanding.
           </p>
           <form id="searchForm" class="mt-10 relative max-w-2xl mx-auto" role="search">
             <label for="q" class="sr-only">Search roles</label>
