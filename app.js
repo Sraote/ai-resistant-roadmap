@@ -445,18 +445,8 @@
         </ul>
         <p class="${p}">Open any skill and expand “Why it's rated…” to see its scores. The AI-trap descriptions, warning signs, verification challenges and “what mastery looks like” lists are also written by hand, not drawn from postings.</p>
 
-        <h2 id="ai-use" class="${h2}">How AI was used to make this site</h2>
-        <div class="mt-3 rounded-2xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/60 dark:bg-indigo-500/10 p-5">
-          <p class="text-slate-700 dark:text-slate-300 leading-relaxed">This project was built with Claude, an AI assistant made by Anthropic. The project's author set the goals, chose the features and asked for each change. Claude did the following work:</p>
-          <ul class="mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-disc pl-5">
-            <li><strong class="text-slate-900 dark:text-white">Code.</strong> The pages, search, styling, job-posting collector and weekly automation were written by Claude.</li>
-            <li><strong class="text-slate-900 dark:text-white">Written content.</strong> The roadmaps, “AI trap” descriptions, warning signs, verification challenges, extra-skill summaries and this Methodology text were drafted by Claude.</li>
-            <li><strong class="text-slate-900 dark:text-white">Judgment calls.</strong> The AI-trap risk scores and the choice of free learning resources are Claude's editorial judgments, not measurements.</li>
-            <li><strong class="text-slate-900 dark:text-white">Testing.</strong> Claude also tested the site in a headless browser and fixed the bugs it found.</li>
-          </ul>
-          <p class="mt-3 text-slate-700 dark:text-slate-300 leading-relaxed">What AI did <em>not</em> do: the site does not use AI while you browse. Posting counts, percentages and quotes come from keyword matching on real job postings, not from an AI model. The weekly link check only tests whether each resource link loads. It does not read the resource, so a working link is not an endorsement of its quality.</p>
-          <p class="mt-3 text-slate-700 dark:text-slate-300 leading-relaxed">Because the content is AI-written, it may contain mistakes and has not been reviewed by industry professionals. Please check important details against the original postings and official documentation, and treat the risk ratings as one reasonable opinion.</p>
-        </div>
+        <h2 id="ai-use" class="${h2}">AI use disclosure</h2>
+        <p class="${p}">This site was built with Claude, an AI assistant made by Anthropic. Claude wrote the code and drafted the written content, including the roadmaps, AI-trap descriptions, challenges, risk ratings and learning-resource picks. The project's author directed the work. The site does not use AI while you browse, and the job-posting numbers come from keyword matching on real postings. Because the content was AI-drafted, double-check anything important.</p>
 
         ${JOB ? `<h2 class="${h2}">Companies in the latest sample</h2>
         <p class="mt-3 text-sm text-slate-500 leading-relaxed">${JOB.boards.map((b) => esc(b.company)).sort((a, b) => a.localeCompare(b)).join(' · ')}</p>
