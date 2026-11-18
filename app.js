@@ -261,6 +261,7 @@
 
     if (parts[0] === 'roles') return renderSelect(params.get('q') || '');
     if (parts[0] === 'about') return renderAbout();
+    if (parts[0] === 'ai-trap') return renderTrap();
     if (parts[0] === 'generating' && findRole(parts[1])) return renderGenerating(findRole(parts[1]));
     if (parts[0] === 'roadmap' && findRole(parts[1])) return renderRoadmap(findRole(parts[1]));
     return renderSearch();
@@ -464,6 +465,68 @@
       if (location.hash === '#/about') renderAbout();
     }
   });
+
+  // ---------- The AI Trap explainer ----------
+  function renderTrap() {
+    document.title = 'The AI Trap · AI-Resistant Roadmaps';
+    const h2 = 'mt-10 text-xl font-bold tracking-tight';
+    const p = 'mt-3 text-slate-600 dark:text-slate-400 leading-relaxed';
+    const strong = 'text-slate-900 dark:text-white';
+    const counts = { high: 0, medium: 0, low: 0 };
+    Object.keys(SKILLS).forEach((id) => { counts[riskOf(id)]++; });
+    const steps = [
+      ['Ask', 'You paste the assignment or task into an AI tool.'],
+      ['It looks right', 'The code runs, the answer reads well, nothing errors.'],
+      ['Accept', 'You move on without checking the details.'],
+      ['The gap', 'You have a result but not the skill. It shows up later in an interview or on the job.']
+    ];
+    app.innerHTML = `
+      <article class="mx-auto max-w-3xl px-4 py-10 sm:py-14 fade-in">
+        <a href="#/" class="text-sm text-slate-500 hover:text-indigo-600">← Back to search</a>
+        <h1 class="mt-4 text-3xl sm:text-4xl font-bold tracking-tight">The AI Trap</h1>
+        <p class="${p}">What it is, how it works, and how this site helps you avoid it.</p>
+
+        <h2 class="${h2}">What is the AI trap?</h2>
+        <p class="${p}">The AI trap is when an AI tool does a task well enough that you feel like you learned it, but you didn't. The output works, so nothing tells you that you can't explain it, change it, or spot when it's wrong. You find out at the worst moment: a live coding interview, a code review, or a bug in production.</p>
+        <p class="${p}">It isn't about using AI. AI is a useful tutor and assistant. The trap is using it <em>instead of</em> building the understanding, so you can't tell when it's wrong.</p>
+
+        <h2 class="${h2}">How it works</h2>
+        <ol class="mt-4 grid gap-3 sm:grid-cols-2">
+          ${steps.map(([t, d], i) => `<li class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
+            <div class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">STEP ${i + 1}</div>
+            <div class="mt-1 font-semibold ${strong}">${t}</div>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">${d}</p></li>`).join('')}
+        </ol>
+        <p class="${p}">The dangerous part is step 2. Wrong AI output often still runs. A query can return numbers, a script can finish, a model can report a score, and all of it can be quietly wrong.</p>
+
+        <h2 class="${h2}">An example</h2>
+        <p class="${p}">Say you ask an AI to join a customers table to an orders table and total up revenue. It writes a query that runs and returns a number. But each customer has many orders, and the join repeats rows, so the total is inflated. Someone who learned joins by hand asks “what does one row of this table represent?” before trusting it. Someone who only prompted never built that habit.</p>
+
+        <h2 class="${h2}">Why some skills are riskier than others</h2>
+        <p class="${p}">Each skill on a roadmap gets an AI-trap risk rating from three questions: how well AI handles the skill, how likely its mistakes are to go unnoticed, and how often interviews test it with no tools. Right now ${counts.high} skills are rated high, ${counts.medium} medium and ${counts.low} low. The ratings are editorial judgments, not measurements. The scoring is explained on the <a class="underline" href="#/about">Methodology</a> page.</p>
+
+        <h2 class="${h2}">What you get for each skill</h2>
+        <ul class="mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-disc pl-5">
+          <li><strong class="${strong}">The AI Trap.</strong> How students typically shortcut that skill, plus warning signs that you've fallen into it.</li>
+          <li><strong class="${strong}">The Independent Verification Challenge.</strong> A short, timed task you do without AI, with pass criteria you check off yourself. If you can pass it, you know the skill.</li>
+          <li><strong class="${strong}">Free learning resources.</strong> Where to build the understanding the challenge tests.</li>
+        </ul>
+
+        <h2 class="${h2}">Using AI without falling in</h2>
+        <ul class="mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-disc pl-5">
+          <li>Try the problem yourself first, then use AI to compare or get unstuck.</li>
+          <li>Ask AI to explain its answer, then explain it back in your own words.</li>
+          <li>Predict the output before you run anything.</li>
+          <li>Check results against something you can verify, like a row count or a hand-worked example.</li>
+          <li>Repeat the task with AI turned off. That is what the verification challenges are for.</li>
+        </ul>
+
+        <div class="mt-10 flex flex-wrap gap-3">
+          <a href="#/" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">Find a role roadmap</a>
+          <a href="#/about" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Read the methodology</a>
+        </div>
+      </article>`;
+  }
 
   // ---------- Page 4: roadmap ----------
   let current = null; // { role, order: [skillIds], filter }

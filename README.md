@@ -19,6 +19,8 @@ Each roadmap page also lists every skill the role's postings ask for, with the s
 
 19 roles across data, software, web, mobile, infrastructure, security, QA, embedded and AI.
 
+The **The AI Trap** tab explains the concept and how the ratings, traps and challenges work.
+
 Extras: dark/light mode, filters (high AI-risk, not yet verified), a challenge timer, keyboard navigation (← → Esc), and progress saved in your browser.
 
 ## Stack
