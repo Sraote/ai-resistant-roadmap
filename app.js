@@ -474,6 +474,12 @@
     const strong = 'text-slate-900 dark:text-white';
     const counts = { high: 0, medium: 0, low: 0 };
     Object.keys(SKILLS).forEach((id) => { counts[riskOf(id)]++; });
+    const examples = (k) => Object.keys(SKILLS).filter((id) => riskOf(id) === k).slice(0, 3).map((id) => esc(SKILLS[id].title)).join(', ');
+    const levels = [
+      { k: 'high', range: '8–9', what: 'AI is very good at this skill, its mistakes tend to be invisible because wrong output still runs or looks right, and interviews often test it with no tools. This is where students can most easily end up with results they can\'t explain.', todo: 'Do the verification challenge before relying on AI for this skill, and always predict or check the output yourself.', ex: examples('high') },
+      { k: 'medium', range: '6–7', what: 'AI helps a lot, but either its errors are easier to catch or interviewers test the skill less often with no tools. You can use AI here, but gaps still show up.', todo: 'Use AI to learn and speed up, then confirm you can explain and redo the work without it.', ex: examples('medium') },
+      { k: 'low', range: '3–5', what: 'AI is less reliable at this skill, wrong output is usually obvious, or the skill is rarely tested live. It is harder to fake, so the trap is smaller.', todo: 'Still do the challenge, but expect fewer surprises. Use AI as a helper as usual.', ex: examples('low') }
+    ];
     const steps = [
       ['Ask', 'You paste the assignment or task into an AI tool.'],
       ['It looks right', 'The code runs, the answer reads well, nothing errors.'],
@@ -502,8 +508,23 @@
         <h2 class="${h2}">An example</h2>
         <p class="${p}">Say you ask an AI to join a customers table to an orders table and total up revenue. It writes a query that runs and returns a number. But each customer has many orders, and the join repeats rows, so the total is inflated. Someone who learned joins by hand asks “what does one row of this table represent?” before trusting it. Someone who only prompted never built that habit.</p>
 
-        <h2 class="${h2}">Why some skills are riskier than others</h2>
-        <p class="${p}">Each skill on a roadmap gets an AI-trap risk rating from three questions: how well AI handles the skill, how likely its mistakes are to go unnoticed, and how often interviews test it with no tools. Right now ${counts.high} skills are rated high, ${counts.medium} medium and ${counts.low} low. The ratings are editorial judgments, not measurements. The scoring is explained on the <a class="underline" href="#/about">Methodology</a> page.</p>
+        <h2 class="${h2}">What the risk ratings mean</h2>
+        <p class="${p}">Each skill on a roadmap gets an AI-trap risk rating. It answers one question: how easy is it to <em>look</em> competent at this skill with AI while not actually being able to do it? Three factors are each scored from 1 to 3, and the total sets the rating.</p>
+        <ul class="mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-disc pl-5">
+          ${RUBRIC.map(([n, d]) => `<li><strong class="${strong}">${n}.</strong> ${d}.</li>`).join('')}
+        </ul>
+        <div class="mt-5 space-y-3">
+          ${levels.map((l) => `<div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${RISK[l.k].chip}"><span class="w-2 h-2 rounded-full ${RISK[l.k].dot}"></span>${RISK[l.k].label}</span>
+              <span class="text-xs text-slate-500">Score ${l.range} of 9 · ${counts[l.k]} skills</span>
+            </div>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">${l.what}</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed"><strong class="${strong}">What to do:</strong> ${l.todo}</p>
+            <p class="mt-2 text-xs text-slate-500">Examples: ${l.ex}</p>
+          </div>`).join('')}
+        </div>
+        <p class="${p}">The ratings are editorial judgments, not measurements, and a low rating doesn't mean a skill is unimportant, only that it's harder to fake. Open any skill and expand “Why it's rated…” to see its scores. The full scoring is on the <a class="underline" href="#/about">Methodology</a> page.</p>
 
         <h2 class="${h2}">What you get for each skill</h2>
         <ul class="mt-3 space-y-2 text-slate-600 dark:text-slate-400 list-disc pl-5">
